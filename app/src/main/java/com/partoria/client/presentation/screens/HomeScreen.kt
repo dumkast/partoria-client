@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.partoria.client.domain.model.ComputerPart
+import com.partoria.client.domain.model.Filter
 import com.partoria.client.presentation.viewmodels.PartsUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 
@@ -30,27 +32,50 @@ fun HomeScreen(
     onProfileClick: () -> Unit
 ) {
     val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        partsViewModel.loadParts()
-    }
+    val currentFilter by partsViewModel.currentFilter.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Computer Parts") },
+                title = { Text("Partoria") },
                 actions = {
+                    if (currentFilter != Filter()) {
+                        IconButton(onClick = { partsViewModel.resetFilters() }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear Filters",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onFilterClick) {
-                        Icon(Icons.Default.List, contentDescription = "Filter")
-                    }
-                    IconButton(onClick = onFavoritesClick) {
-                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorites")
-                    }
-                    IconButton(onClick = onProfileClick) {
-                        Icon(Icons.Default.Person, contentDescription = "Profile")
+                        Icon(Icons.Default.List, contentDescription = "Filters")
                     }
                 }
             )
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = true,
+                    onClick = { /* Already here */ },
+                    icon = { Icon(Icons.Default.List, contentDescription = "Home") },
+                    label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onFavoritesClick,
+                    icon = { Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorites") },
+                    label = { Text("Favorites") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onProfileClick,
+                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                    label = { Text("Profile") }
+                )
+            }
         }
     ) { paddingValues ->
         Box(
@@ -58,40 +83,41 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Fix: Capture state locally for smart casting
             when (val state = partsState) {
                 is PartsUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is PartsUiState.Success -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(state.parts) { part ->
-                            PartCard(
-                                part = part,
-                                onClick = { onPartClick(part.id) }
-                            )
+                    if (state.parts.isEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("No parts found", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { partsViewModel.resetFilters() }) {
+                                Text("Reset Filters")
+                            }
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(state.parts) { part ->
+                                PartCard(part = part, onClick = { onPartClick(part.id) })
+                            }
                         }
                     }
                 }
                 is PartsUiState.Error -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { partsViewModel.loadParts() }) {
-                            Text("Retry")
-                        }
-                    }
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }

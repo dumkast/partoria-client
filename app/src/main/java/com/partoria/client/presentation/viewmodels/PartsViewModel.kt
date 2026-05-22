@@ -31,9 +31,15 @@ class PartsViewModel(
     private val _filtersMetaState = MutableStateFlow<FiltersMetaUiState>(FiltersMetaUiState.Loading)
     val filtersMetaState: StateFlow<FiltersMetaUiState> = _filtersMetaState.asStateFlow()
 
-    private var currentFilter = Filter(page = 1, pageSize = 20)
+    private val _currentFilter = MutableStateFlow(Filter())
+    val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
+
+    init {
+        loadParts()
+    }
 
     fun loadParts() {
+        _currentFilter.value = Filter()
         viewModelScope.launch {
             _partsState.value = PartsUiState.Loading
             try {
@@ -46,32 +52,14 @@ class PartsViewModel(
     }
 
     fun loadFilteredParts(filter: Filter) {
+        _currentFilter.value = filter
         viewModelScope.launch {
             _partsState.value = PartsUiState.Loading
             try {
-                currentFilter = filter
                 val parts = getFilteredPartsUseCase(filter)
                 _partsState.value = PartsUiState.Success(parts)
             } catch (e: Exception) {
                 _partsState.value = PartsUiState.Error(e.message ?: "Unknown error")
-            }
-        }
-    }
-
-    fun loadMoreParts() {
-        viewModelScope.launch {
-            val currentState = _partsState.value
-            if (currentState is PartsUiState.Success) {
-                val nextPage = currentFilter.copy(page = currentFilter.page + 1)
-                try {
-                    val newParts = getFilteredPartsUseCase(nextPage)
-                    if (newParts.isNotEmpty()) {
-                        currentFilter = nextPage
-                        val allParts = currentState.parts + newParts
-                        _partsState.value = PartsUiState.Success(allParts)
-                    }
-                } catch (e: Exception) {
-                }
             }
         }
     }
@@ -120,6 +108,7 @@ class PartsViewModel(
     }
 
     fun loadFiltersMeta() {
+        if (_filtersMetaState.value is FiltersMetaUiState.Success) return
         viewModelScope.launch {
             _filtersMetaState.value = FiltersMetaUiState.Loading
             try {
@@ -129,6 +118,11 @@ class PartsViewModel(
                 _filtersMetaState.value = FiltersMetaUiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun resetFilters() {
+        _currentFilter.value = Filter()
+        loadParts()
     }
 
     fun isFavorite(partId: Int, onResult: (Boolean) -> Unit) {

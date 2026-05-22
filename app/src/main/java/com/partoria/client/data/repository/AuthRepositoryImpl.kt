@@ -16,14 +16,6 @@ class AuthRepositoryImpl(
     private val tokenDataStore: TokenDataStore
 ) : AuthRepository {
 
-//    override suspend fun login(username: String, password: String): AuthUser? {
-//        return try {
-//            val response = apiService.login(LoginRequest(username, password))
-//            AuthUser(response.username, response.token)
-//        } catch (e: Exception) {
-//            null
-//        }
-//    }
     override suspend fun login(username: String, password: String): AuthUser? {
         return try {
             println("LOGIN ATTEMPT: $username")

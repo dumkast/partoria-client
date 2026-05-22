@@ -26,7 +26,6 @@ fun RegisterScreen(
     val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
     var passwordError by remember { mutableStateOf<String?>(null) }
 
-    // Фикс смарт-каста: локальная копия для LaunchedEffect и UI
     val currentState = uiState
 
     LaunchedEffect(currentState) {

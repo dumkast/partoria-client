@@ -10,7 +10,7 @@ data class Filter(
     val sortBy: String? = null,
     val sortDirection: String? = null,
     val page: Int = 1,
-    val pageSize: Int = 20
+    val pageSize: Int = 100
 )
 
 data class FilterMeta(

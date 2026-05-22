@@ -15,16 +15,9 @@ import io.ktor.http.contentType
 
 class ApiServiceImpl(
     private val client: HttpClient,
-    //private val baseUrl: String = "http://192.168.1.197:8080"
     private val baseUrl: String = "http://10.0.2.2:8080"
 ) : ApiService {
 
-//    override suspend fun login(request: LoginRequest): LoginResponse {
-//        return client.post {
-//            url("$baseUrl/auth/login")
-//            setBody(request)
-//        }.body()
-//    }
     override suspend fun login(request: LoginRequest): LoginResponse {
         println("API CALL: login to $baseUrl/auth/login")
         return client.post {
@@ -34,12 +27,6 @@ class ApiServiceImpl(
         }.body()
     }
 
-//    override suspend fun register(request: RegisterRequest): RegisterResponse {
-//        return client.post {
-//            url("$baseUrl/auth/register")
-//            setBody(request)
-//        }.body()
-//    }
     override suspend fun register(request: RegisterRequest): RegisterResponse {
         println("API CALL: register to $baseUrl/auth/register")
         return client.post {

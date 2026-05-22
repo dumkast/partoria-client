@@ -44,7 +44,6 @@ fun FavoritesScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Fix: Capture state in a local variable for smart casting
             when (val state = favoritesState) {
                 is FavoritesUiState.Loading -> {
                     CircularProgressIndicator(
