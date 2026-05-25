@@ -3,6 +3,10 @@ package com.partoria.client.presentation.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -62,7 +66,15 @@ fun FavoritesScreen(
                             items(state.favorites) { part ->
                                 PartCard(
                                     part = part,
-                                    onClick = { onPartClick(part.id) }
+                                    onClick = { onPartClick(part.id) },
+                                    isFavorite = true,
+                                    onFavoriteClick = { isFavorite ->
+                                        if (isFavorite) {
+                                            partsViewModel.removeFromFavorites(part.id)
+                                        } else {
+                                            partsViewModel.addToFavorites(part.id)
+                                        }
+                                    }
                                 )
                             }
                         }

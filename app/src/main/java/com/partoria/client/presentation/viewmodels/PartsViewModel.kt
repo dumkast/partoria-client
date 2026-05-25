@@ -126,7 +126,21 @@ class PartsViewModel(
         viewModelScope.launch {
             try {
                 addToFavoritesUseCase(partId)
-                loadFavorites()
+                val currentState = _favoritesState.value
+                if (currentState is FavoritesUiState.Success) {
+                    val currentFavorites = currentState.favorites.toMutableList()
+                    val part = partsState.value.let { state ->
+                        if (state is PartsUiState.Success) {
+                            state.parts.find { it.id == partId }
+                        } else null
+                    }
+                    part?.let {
+                        currentFavorites.add(it)
+                        _favoritesState.value = FavoritesUiState.Success(currentFavorites)
+                    }
+                } else {
+                    loadFavorites()
+                }
             } catch (e: Exception) {
             }
         }
@@ -136,7 +150,13 @@ class PartsViewModel(
         viewModelScope.launch {
             try {
                 removeFromFavoritesUseCase(partId)
-                loadFavorites()
+                val currentState = _favoritesState.value
+                if (currentState is FavoritesUiState.Success) {
+                    val currentFavorites = currentState.favorites.filter { it.id != partId }
+                    _favoritesState.value = FavoritesUiState.Success(currentFavorites)
+                } else {
+                    loadFavorites()
+                }
             } catch (e: Exception) {
             }
         }

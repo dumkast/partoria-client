@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -17,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.partoria.client.domain.model.ComputerPart
+import com.partoria.client.presentation.viewmodels.FavoritesUiState
 import com.partoria.client.presentation.viewmodels.PartsUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 
@@ -29,9 +32,18 @@ fun HomeScreen(
 ) {
     val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
     val currentFilter by partsViewModel.currentFilter.collectAsStateWithLifecycle()
+    val favoritesState by partsViewModel.favoritesState.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
-    var isSearching by remember { mutableStateOf(false) }
+
+    val favoritesIds = remember(favoritesState) {
+        val state = favoritesState
+        if (state is FavoritesUiState.Success) {
+            state.favorites.map { it.id }.toSet()
+        } else {
+            emptySet()
+        }
+    }
 
     val isFilterActive = currentFilter != null && (
             currentFilter?.categories?.isNotEmpty() == true ||
@@ -42,6 +54,10 @@ fun HomeScreen(
                     currentFilter?.maxYear != null ||
                     currentFilter?.sortBy != null
             )
+
+    LaunchedEffect(Unit) {
+        partsViewModel.loadFavorites()
+    }
 
     Scaffold(
         topBar = {
@@ -55,7 +71,7 @@ fun HomeScreen(
                     }
                     IconButton(onClick = onFilterClick) {
                         Icon(
-                            if (isFilterActive) Icons.Default.List else Icons.Default.List,
+                            Icons.Default.List,
                             contentDescription = "Filter",
                             tint = if (isFilterActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                         )
@@ -69,7 +85,6 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Поисковая строка - без карточки и с маленьким отступом
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { query ->
@@ -104,10 +119,8 @@ fun HomeScreen(
                 )
             )
 
-            // Контент
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 when (val state = partsState) {
                     is PartsUiState.Loading -> {
@@ -133,16 +146,14 @@ fun HomeScreen(
                                         onClick = {
                                             searchQuery = ""
                                             partsViewModel.loadParts()
-                                        },
-                                        shape = MaterialTheme.shapes.large
+                                        }
                                     ) {
                                         Text("Clear search")
                                     }
                                 } else if (isFilterActive) {
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Button(
-                                        onClick = { partsViewModel.resetFilters() },
-                                        shape = MaterialTheme.shapes.large
+                                        onClick = { partsViewModel.resetFilters() }
                                     ) {
                                         Text("Clear filters")
                                     }
@@ -161,7 +172,15 @@ fun HomeScreen(
                                 items(state.parts) { part ->
                                     PartCard(
                                         part = part,
-                                        onClick = { onPartClick(part.id) }
+                                        onClick = { onPartClick(part.id) },
+                                        isFavorite = part.id in favoritesIds,
+                                        onFavoriteClick = { isFavorite ->
+                                            if (isFavorite) {
+                                                partsViewModel.removeFromFavorites(part.id)
+                                            } else {
+                                                partsViewModel.addToFavorites(part.id)
+                                            }
+                                        }
                                     )
                                 }
                             }
@@ -191,7 +210,9 @@ fun HomeScreen(
 @Composable
 fun PartCard(
     part: ComputerPart,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isFavorite: Boolean,
+    onFavoriteClick: (Boolean) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -204,8 +225,21 @@ fun PartCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier.size(80.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
+            }
+
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -233,15 +267,15 @@ fun PartCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Box(
-                modifier = Modifier.size(80.dp),
-                contentAlignment = Alignment.Center
+
+            IconButton(
+                onClick = { onFavoriteClick(isFavorite) }
             ) {
                 Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
