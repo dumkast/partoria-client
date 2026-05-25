@@ -21,7 +21,7 @@ class AuthRepositoryImpl(
             println("LOGIN ATTEMPT: $username")
             val response = apiService.login(LoginRequest(username, password))
             println("LOGIN SUCCESS: ${response.token}")
-            AuthUser(response.username, response.token)
+            AuthUser(response.username, response.token, response.role)
         } catch (e: Exception) {
             println("LOGIN ERROR: ${e.message}")
             e.printStackTrace()
@@ -50,8 +50,16 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun saveAuthData(token: String, username: String) {
-        tokenDataStore.saveToken(token, username)
+    override suspend fun saveAuthData(token: String, username: String, role: String) {
+        tokenDataStore.saveToken(token, username, role)
+    }
+
+    override fun getUserRole(): Flow<String?> {
+        return tokenDataStore.getRole()
+    }
+
+    override fun getUsername(): Flow<String?> {
+        return tokenDataStore.getUsername()
     }
 
     override suspend fun clearAuthData() {

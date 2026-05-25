@@ -15,12 +15,20 @@ class TokenDataStore(private val context: Context) {
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("jwt_token")
         private val USERNAME_KEY = stringPreferencesKey("username")
+        private val ROLE_KEY = stringPreferencesKey("role")
     }
 
-    suspend fun saveToken(token: String, username: String) {
+    suspend fun saveToken(token: String, username: String, role: String) {
         context.dataStore.edit { preferences ->
             preferences[TOKEN_KEY] = token
             preferences[USERNAME_KEY] = username
+            preferences[ROLE_KEY] = role
+        }
+    }
+
+    fun getRole(): Flow<String?> {
+        return context.dataStore.data.map { preferences ->
+            preferences[ROLE_KEY]
         }
     }
 

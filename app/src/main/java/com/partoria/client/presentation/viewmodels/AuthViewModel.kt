@@ -2,7 +2,9 @@ package com.partoria.client.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.partoria.client.domain.repository.AuthRepository
 import com.partoria.client.domain.usecase.auth.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +15,9 @@ class AuthViewModel(
     private val registerUseCase: RegisterUseCase,
     private val saveAuthDataUseCase: SaveAuthDataUseCase,
     private val clearAuthDataUseCase: ClearAuthDataUseCase,
-    private val isLoggedInUseCase: IsLoggedInUseCase
+    private val isLoggedInUseCase: IsLoggedInUseCase,
+    private val getUserRoleUseCase: GetUserRoleUseCase,
+    private val getUsernameUseCase: GetUsernameUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
@@ -24,12 +28,20 @@ class AuthViewModel(
             _uiState.value = AuthUiState.Loading
             val result = loginUseCase(username, password)
             if (result != null) {
-                saveAuthDataUseCase(result.token, result.username)
+                saveAuthDataUseCase(result.token, result.username, result.role)
                 _uiState.value = AuthUiState.Success
             } else {
                 _uiState.value = AuthUiState.Error("Invalid username or password")
             }
         }
+    }
+
+    fun getUserRole(): Flow<String?> {
+        return getUserRoleUseCase()
+    }
+
+    fun getUsername(): Flow<String?> {
+        return getUsernameUseCase()
     }
 
     fun register(username: String, password: String) {
@@ -51,7 +63,7 @@ class AuthViewModel(
         }
     }
 
-    fun isLoggedIn(): kotlinx.coroutines.flow.Flow<Boolean> {
+    fun isLoggedIn(): Flow<Boolean> {
         return isLoggedInUseCase()
     }
 

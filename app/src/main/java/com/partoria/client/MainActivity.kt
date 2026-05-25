@@ -38,13 +38,17 @@ class MainActivity : ComponentActivity() {
         val saveAuthDataUseCase = SaveAuthDataUseCase(authRepository)
         val clearAuthDataUseCase = ClearAuthDataUseCase(authRepository)
         val isLoggedInUseCase = IsLoggedInUseCase(authRepository)
+        val getUserRoleUseCase = GetUserRoleUseCase(authRepository)
+        val getUsernameUseCase = GetUsernameUseCase(authRepository)
 
         authViewModel = AuthViewModel(
             loginUseCase,
             registerUseCase,
             saveAuthDataUseCase,
             clearAuthDataUseCase,
-            isLoggedInUseCase
+            isLoggedInUseCase,
+            getUserRoleUseCase,
+            getUsernameUseCase
         )
 
         val getAllPartsUseCase = GetAllPartsUseCase(partRepository)
