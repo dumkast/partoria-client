@@ -8,9 +8,7 @@ data class Filter(
     val minYear: Int? = null,
     val maxYear: Int? = null,
     val sortBy: String? = null,
-    val sortDirection: String? = null,
-    val page: Int = 1,
-    val pageSize: Int = 100
+    val sortDirection: String? = null
 )
 
 data class FilterMeta(

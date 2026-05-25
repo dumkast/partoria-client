@@ -19,7 +19,8 @@ class PartsViewModel(
     private val getFiltersMetaUseCase: GetFiltersMetaUseCase,
     private val addToFavoritesUseCase: AddToFavoritesUseCase,
     private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
-    private val getFavoritesUseCase: GetFavoritesUseCase
+    private val getFavoritesUseCase: GetFavoritesUseCase,
+    private val searchPartsUseCase: SearchPartsUseCase
 ) : ViewModel() {
 
     private val _partsState = MutableStateFlow<PartsUiState>(PartsUiState.Loading)
@@ -31,18 +32,14 @@ class PartsViewModel(
     private val _filtersMetaState = MutableStateFlow<FiltersMetaUiState>(FiltersMetaUiState.Loading)
     val filtersMetaState: StateFlow<FiltersMetaUiState> = _filtersMetaState.asStateFlow()
 
-    private val _currentFilter = MutableStateFlow(Filter())
-    val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
-
-    init {
-        loadParts()
-    }
+    private val _currentFilter = MutableStateFlow<Filter?>(null)
+    val currentFilter: StateFlow<Filter?> = _currentFilter.asStateFlow()
 
     fun loadParts() {
-        _currentFilter.value = Filter()
         viewModelScope.launch {
             _partsState.value = PartsUiState.Loading
             try {
+                _currentFilter.value = null
                 val parts = getAllPartsUseCase()
                 _partsState.value = PartsUiState.Success(parts)
             } catch (e: Exception) {
@@ -52,16 +49,33 @@ class PartsViewModel(
     }
 
     fun loadFilteredParts(filter: Filter) {
-        _currentFilter.value = filter
         viewModelScope.launch {
             _partsState.value = PartsUiState.Loading
             try {
+                _currentFilter.value = filter
                 val parts = getFilteredPartsUseCase(filter)
                 _partsState.value = PartsUiState.Success(parts)
             } catch (e: Exception) {
                 _partsState.value = PartsUiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun searchParts(query: String) {
+        viewModelScope.launch {
+            _partsState.value = PartsUiState.Loading
+            try {
+                _currentFilter.value = null
+                val parts = searchPartsUseCase(query)
+                _partsState.value = PartsUiState.Success(parts)
+            } catch (e: Exception) {
+                _partsState.value = PartsUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun resetFilters() {
+        loadParts()
     }
 
     fun loadPartDetails(partId: Int, onResult: (ComputerPart?) -> Unit) {
@@ -108,7 +122,6 @@ class PartsViewModel(
     }
 
     fun loadFiltersMeta() {
-        if (_filtersMetaState.value is FiltersMetaUiState.Success) return
         viewModelScope.launch {
             _filtersMetaState.value = FiltersMetaUiState.Loading
             try {
@@ -118,11 +131,6 @@ class PartsViewModel(
                 _filtersMetaState.value = FiltersMetaUiState.Error(e.message ?: "Unknown error")
             }
         }
-    }
-
-    fun resetFilters() {
-        _currentFilter.value = Filter()
-        loadParts()
     }
 
     fun isFavorite(partId: Int, onResult: (Boolean) -> Unit) {

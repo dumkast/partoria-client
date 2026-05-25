@@ -8,9 +8,10 @@ interface ApiService {
     suspend fun getAllParts(token: String): List<PartResponse>
     suspend fun getPartById(token: String, id: Int): PartResponse
     suspend fun getPartWithDetails(token: String, id: Int): PartResponse
-    suspend fun getFilteredParts(token: String, filter: FilterRequest): FilterResponse
+    suspend fun getFilteredParts(token: String, filter: FilterRequest): PartsResponse
     suspend fun getFiltersMeta(token: String): FiltersMetaResponse
     suspend fun getFavorites(token: String): List<PartResponse>
     suspend fun addToFavorites(token: String, partId: Int)
     suspend fun removeFromFavorites(token: String, partId: Int)
+    suspend fun searchParts(token: String, query: String): PartsResponse
 }

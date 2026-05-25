@@ -52,9 +52,7 @@ class PartRepositoryImpl(
             minYear = filter.minYear,
             maxYear = filter.maxYear,
             sortBy = filter.sortBy,
-            sortDirection = filter.sortDirection,
-            page = filter.page,
-            pageSize = filter.pageSize
+            sortDirection = filter.sortDirection
         )
         val response = apiService.getFilteredParts(token, request)
         println("FILTER RESPONSE: ${response.items.size} items")
@@ -68,12 +66,12 @@ class PartRepositoryImpl(
             categories = response.categories,
             brands = response.brands,
             priceRange = com.partoria.client.domain.model.PriceRange(
-                min = response.priceRange.min.toDouble(),
-                max = response.priceRange.max.toDouble()
+                min = response.priceRange.min,
+                max = response.priceRange.max
             ),
             yearRange = com.partoria.client.domain.model.YearRange(
-                min = response.yearRange.min.toInt(),
-                max = response.yearRange.max.toInt()
+                min = response.yearRange.min,
+                max = response.yearRange.max
             )
         )
     }
@@ -94,6 +92,13 @@ class PartRepositoryImpl(
         return response.map { it.toDomain() }
     }
 
+    override suspend fun searchParts(query: String): List<ComputerPart> {
+        println("SEARCH REQUEST: $query")
+        val token = getToken()
+        val response = apiService.searchParts(token, query)
+        return response.items.map { it.toDomain() }
+    }
+
     private fun com.partoria.client.data.model.PartResponse.toDomain(): ComputerPart {
         return ComputerPart(
             id = id,
@@ -102,7 +107,6 @@ class PartRepositoryImpl(
             brand = brand,
             price = price,
             specs = specs,
-            imageUrl = imageUrl,
             releaseYear = releaseYear,
             details = details.map { detail ->
                 PartDetail(

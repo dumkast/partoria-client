@@ -12,7 +12,6 @@ import io.ktor.client.request.url
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
-
 class ApiServiceImpl(
     private val client: HttpClient,
     private val baseUrl: String = "http://10.0.2.2:8080"
@@ -63,7 +62,7 @@ class ApiServiceImpl(
         }.body()
     }
 
-    override suspend fun getFilteredParts(token: String, filter: FilterRequest): FilterResponse {
+    override suspend fun getFilteredParts(token: String, filter: FilterRequest): PartsResponse {
         println("API CALL: getFilteredParts to $baseUrl/parts/filter")
         return client.post {
             url("$baseUrl/parts/filter")
@@ -109,5 +108,15 @@ class ApiServiceImpl(
                 append(HttpHeaders.Authorization, "Bearer $token")
             }
         }
+    }
+
+    override suspend fun searchParts(token: String, query: String): PartsResponse {
+        println("API CALL: searchParts to $baseUrl/parts/search?q=$query")
+        return client.get {
+            url("$baseUrl/parts/search?q=$query")
+            headers {
+                append(HttpHeaders.Authorization, "Bearer $token")
+            }
+        }.body()
     }
 }

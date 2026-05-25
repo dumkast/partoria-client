@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,9 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.partoria.client.domain.model.ComputerPart
-import com.partoria.client.domain.model.Filter
 import com.partoria.client.presentation.viewmodels.PartsUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 
@@ -32,50 +31,57 @@ fun HomeScreen(
     onProfileClick: () -> Unit
 ) {
     val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
-    val currentFilter by partsViewModel.currentFilter.collectAsStateWithLifecycle()
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearching by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        partsViewModel.loadParts()
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Partoria") },
-                actions = {
-                    if (currentFilter != Filter()) {
-                        IconButton(onClick = { partsViewModel.resetFilters() }) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "Clear Filters",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
+                title = {
+                    if (isSearching) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { query ->
+                                searchQuery = query
+                                if (query.isNotEmpty()) {
+                                    partsViewModel.searchParts(query)
+                                } else {
+                                    partsViewModel.loadParts()
+                                }
+                            },
+                            placeholder = { Text("Search parts...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    } else {
+                        Text("Computer Parts")
                     }
-
+                },
+                actions = {
+                    IconButton(onClick = {
+                        isSearching = !isSearching
+                        if (!isSearching) {
+                            searchQuery = ""
+                            partsViewModel.loadParts()
+                        }
+                    }) {
+                        Icon(Icons.Default.Search, contentDescription = "Search")
+                    }
                     IconButton(onClick = onFilterClick) {
-                        Icon(Icons.Default.List, contentDescription = "Filters")
+                        Icon(Icons.Default.List, contentDescription = "Filter")
+                    }
+                    IconButton(onClick = onFavoritesClick) {
+                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorites")
+                    }
+                    IconButton(onClick = onProfileClick) {
+                        Icon(Icons.Default.Person, contentDescription = "Profile")
                     }
                 }
             )
-        },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { /* Already here */ },
-                    icon = { Icon(Icons.Default.List, contentDescription = "Home") },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onFavoritesClick,
-                    icon = { Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorites") },
-                    label = { Text("Favorites") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onProfileClick,
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                    label = { Text("Profile") }
-                )
-            }
         }
     ) { paddingValues ->
         Box(
@@ -85,7 +91,9 @@ fun HomeScreen(
         ) {
             when (val state = partsState) {
                 is PartsUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
                 is PartsUiState.Success -> {
                     if (state.parts.isEmpty()) {
@@ -94,30 +102,45 @@ fun HomeScreen(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("No parts found", style = MaterialTheme.typography.titleMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(onClick = { partsViewModel.resetFilters() }) {
+                            Text(
+                                text = "No parts found",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = {
+                                partsViewModel.resetFilters()
+                            }) {
                                 Text("Reset Filters")
                             }
                         }
                     } else {
                         LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(state.parts) { part ->
-                                PartCard(part = part, onClick = { onPartClick(part.id) })
+                                PartCard(
+                                    part = part,
+                                    onClick = { onPartClick(part.id) }
+                                )
                             }
                         }
                     }
                 }
                 is PartsUiState.Error -> {
-                    Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = state.message,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { partsViewModel.loadParts() }) {
+                            Text("Retry")
+                        }
+                    }
                 }
             }
         }
@@ -141,6 +164,16 @@ fun PartCard(
                 .padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Box(
+                modifier = Modifier.size(80.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -155,7 +188,7 @@ fun PartCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "\$${part.price}",
+                    text = "$${part.price}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
@@ -164,11 +197,6 @@ fun PartCard(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            AsyncImage(
-                model = part.imageUrl,
-                contentDescription = part.name,
-                modifier = Modifier.size(80.dp)
-            )
         }
     }
 }

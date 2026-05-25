@@ -7,7 +7,6 @@ data class ComputerPart(
     val brand: String,
     val price: Double,
     val specs: String,
-    val imageUrl: String,
     val releaseYear: Int,
     val details: List<PartDetail> = emptyList()
 )

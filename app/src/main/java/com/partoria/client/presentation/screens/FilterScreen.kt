@@ -28,42 +28,50 @@ fun FilterScreen(
     val filtersMetaState by partsViewModel.filtersMetaState.collectAsStateWithLifecycle()
     val savedFilter by partsViewModel.currentFilter.collectAsStateWithLifecycle()
 
-    var selectedCategories by remember { mutableStateOf<List<String>>(savedFilter.categories ?: emptyList()) }
-    var selectedBrands by remember { mutableStateOf<List<String>>(savedFilter.brands ?: emptyList()) }
+    var selectedCategories by remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedBrands by remember { mutableStateOf<List<String>>(emptyList()) }
+    var minPrice by remember { mutableStateOf(0.0) }
+    var maxPrice by remember { mutableStateOf(10000.0) }
+    var minYear by remember { mutableStateOf(2000) }
+    var maxYear by remember { mutableStateOf(2025) }
+    var sortBy by remember { mutableStateOf<String?>(null) }
+    var sortDirection by remember { mutableStateOf("asc") }
+    var priceRange by remember { mutableStateOf(0f..10000f) }
+    var yearRange by remember { mutableStateOf(2000f..2025f) }
+    var isInitialized by remember { mutableStateOf(false) }
 
-    var minPrice by remember { mutableStateOf(savedFilter.minPrice ?: 0.0) }
-    var maxPrice by remember { mutableStateOf(savedFilter.maxPrice ?: 10000.0) }
-    var minYear by remember { mutableStateOf(savedFilter.minYear ?: 2000) }
-    var maxYear by remember { mutableStateOf(savedFilter.maxYear ?: 2026) }
-
-    var sortBy by remember { mutableStateOf<String?>(savedFilter.sortBy) }
-    var sortDirection by remember { mutableStateOf(savedFilter.sortDirection ?: "asc") }
-
-    var priceRange by remember { mutableStateOf((savedFilter.minPrice?.toFloat() ?: 0f)..(savedFilter.maxPrice?.toFloat() ?: 10000f)) }
-    var yearRange by remember { mutableStateOf((savedFilter.minYear?.toFloat() ?: 2000f)..(savedFilter.maxYear?.toFloat() ?: 2026f)) }
-
-    var metaLoaded by remember { mutableStateOf(false) }
     val sortOptions = listOf("price", "name", "year", "brand")
 
     LaunchedEffect(Unit) {
-        partsViewModel.loadFiltersMeta()
+        if (filtersMetaState is FiltersMetaUiState.Loading) {
+            partsViewModel.loadFiltersMeta()
+        }
     }
 
     val currentState = filtersMetaState
 
-    LaunchedEffect(currentState) {
-        if (currentState is FiltersMetaUiState.Success && !metaLoaded) {
+    LaunchedEffect(currentState, savedFilter) {
+        if (currentState is FiltersMetaUiState.Success && !isInitialized) {
             val meta = currentState.meta
-
-            if (savedFilter.minPrice == null) minPrice = meta.priceRange.min
-            if (savedFilter.maxPrice == null) maxPrice = meta.priceRange.max
-            if (savedFilter.minYear == null) minYear = meta.yearRange.min
-            if (savedFilter.maxYear == null) maxYear = meta.yearRange.max
-
-            priceRange = (savedFilter.minPrice?.toFloat() ?: meta.priceRange.min.toFloat())..(savedFilter.maxPrice?.toFloat() ?: meta.priceRange.max.toFloat())
-            yearRange = (savedFilter.minYear?.toFloat() ?: meta.yearRange.min.toFloat())..(savedFilter.maxYear?.toFloat() ?: meta.yearRange.max.toFloat())
-
-            metaLoaded = true
+            val filter = savedFilter
+            if (filter == null) {
+                minPrice = meta.priceRange.min
+                maxPrice = meta.priceRange.max
+                minYear = meta.yearRange.min
+                maxYear = meta.yearRange.max
+            } else {
+                selectedCategories = filter.categories ?: emptyList()
+                selectedBrands = filter.brands ?: emptyList()
+                minPrice = filter.minPrice ?: meta.priceRange.min
+                maxPrice = filter.maxPrice ?: meta.priceRange.max
+                minYear = filter.minYear ?: meta.yearRange.min
+                maxYear = filter.maxYear ?: meta.yearRange.max
+                sortBy = filter.sortBy
+                sortDirection = filter.sortDirection ?: "asc"
+            }
+            priceRange = minPrice.toFloat()..maxPrice.toFloat()
+            yearRange = minYear.toFloat()..maxYear.toFloat()
+            isInitialized = true
         }
     }
 
@@ -73,35 +81,31 @@ fun FilterScreen(
                 title = { Text("Filters") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 actions = {
-                    if (currentState is FiltersMetaUiState.Success) {
-                        TextButton(
-                            onClick = {
-                                val meta = currentState.meta
-                                selectedCategories = emptyList()
-                                selectedBrands = emptyList()
-                                minPrice = meta.priceRange.min
-                                maxPrice = meta.priceRange.max
-                                minYear = meta.yearRange.min
-                                maxYear = meta.yearRange.max
-                                priceRange = meta.priceRange.min.toFloat()..meta.priceRange.max.toFloat()
-                                yearRange = meta.yearRange.min.toFloat()..meta.yearRange.max.toFloat()
-                                sortBy = null
-                                sortDirection = "asc"
-
-                                partsViewModel.resetFilters()
-                                onBack()
-                            }
-                        ) {
-                            Text(
-                                text = "Reset",
-                                color = MaterialTheme.colorScheme.error,
-                                fontWeight = FontWeight.Bold
+                    TextButton(
+                        onClick = {
+                            val maxLimit = (currentState as? FiltersMetaUiState.Success)?.meta?.priceRange?.max ?: 10000.0
+                            onApplyFilter(
+                                Filter(
+                                    categories = selectedCategories.takeIf { it.isNotEmpty() },
+                                    brands = selectedBrands.takeIf { it.isNotEmpty() },
+                                    minPrice = if (minPrice > 0) minPrice else null,
+                                    maxPrice = if (maxPrice < maxLimit) maxPrice else null,
+                                    minYear = if (minYear > 2000) minYear else null,
+                                    maxYear = if (maxYear < 2025) maxYear else null,
+                                    sortBy = sortBy,
+                                    sortDirection = sortDirection
+                                )
                             )
                         }
+                    ) {
+                        Text("Apply")
                     }
                 }
             )
@@ -152,14 +156,32 @@ fun FilterScreen(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
-                            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                                Text(
-                                    text = "Categories",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Categories",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    if (selectedCategories.isNotEmpty()) {
+                                        TextButton(
+                                            onClick = { selectedCategories = emptyList() }
+                                        ) {
+                                            Text("Clear", color = MaterialTheme.colorScheme.error)
+                                        }
+                                    }
+                                }
                                 Spacer(modifier = Modifier.height(8.dp))
-                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     items(meta.categories) { category ->
                                         FilterChip(
                                             selected = selectedCategories.contains(category),
@@ -188,14 +210,32 @@ fun FilterScreen(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
-                            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                                Text(
-                                    text = "Brands",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Brands",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    if (selectedBrands.isNotEmpty()) {
+                                        TextButton(
+                                            onClick = { selectedBrands = emptyList() }
+                                        ) {
+                                            Text("Clear", color = MaterialTheme.colorScheme.error)
+                                        }
+                                    }
+                                }
                                 Spacer(modifier = Modifier.height(8.dp))
-                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     items(meta.brands) { brand ->
                                         FilterChip(
                                             selected = selectedBrands.contains(brand),
@@ -224,31 +264,25 @@ fun FilterScreen(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
-                            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                                val priceMin = meta.priceRange.min.toFloat()
-                                val priceMax = meta.priceRange.max.toFloat()
-
-                                if (priceMax > priceMin && priceRange.start >= priceMin && priceRange.endInclusive <= priceMax) {
-                                    Text(
-                                        text = "Price Range: \$${priceRange.start.toInt()} - \$${priceRange.endInclusive.toInt()}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    RangeSlider(
-                                        value = priceRange,
-                                        onValueChange = { priceRange = it },
-                                        onValueChangeFinished = {
-                                            minPrice = priceRange.start.toDouble()
-                                            maxPrice = priceRange.endInclusive.toDouble()
-                                        },
-                                        valueRange = priceMin..priceMax
-                                    )
-                                } else {
-                                    Text(
-                                        text = "Price Range: \$${priceMin.toInt()} - \$${priceMax.toInt()}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            ) {
+                                Text(
+                                    text = "Price Range: $${minPrice.toInt()} - $${maxPrice.toInt()}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                RangeSlider(
+                                    value = priceRange,
+                                    onValueChange = { priceRange = it },
+                                    valueRange = meta.priceRange.min.toFloat()..meta.priceRange.max.toFloat(),
+                                    steps = 20
+                                )
+                                LaunchedEffect(priceRange) {
+                                    minPrice = priceRange.start.toDouble()
+                                    maxPrice = priceRange.endInclusive.toDouble()
                                 }
                             }
                         }
@@ -259,31 +293,25 @@ fun FilterScreen(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
-                            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                                val yearMin = meta.yearRange.min.toFloat()
-                                val yearMax = meta.yearRange.max.toFloat()
-
-                                if (yearMax > yearMin && yearRange.start >= yearMin && yearRange.endInclusive <= yearMax) {
-                                    Text(
-                                        text = "Year Range: ${yearRange.start.toInt()} - ${yearRange.endInclusive.toInt()}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    RangeSlider(
-                                        value = yearRange,
-                                        onValueChange = { yearRange = it },
-                                        onValueChangeFinished = {
-                                            minYear = yearRange.start.toInt()
-                                            maxYear = yearRange.endInclusive.toInt()
-                                        },
-                                        valueRange = yearMin..yearMax
-                                    )
-                                } else {
-                                    Text(
-                                        text = "Year Range: ${yearMin.toInt()} - ${yearMax.toInt()}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            ) {
+                                Text(
+                                    text = "Year Range: $minYear - $maxYear",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                RangeSlider(
+                                    value = yearRange,
+                                    onValueChange = { yearRange = it },
+                                    valueRange = meta.yearRange.min.toFloat()..meta.yearRange.max.toFloat(),
+                                    steps = 20
+                                )
+                                LaunchedEffect(yearRange) {
+                                    minYear = yearRange.start.toInt()
+                                    maxYear = yearRange.endInclusive.toInt()
                                 }
                             }
                         }
@@ -294,15 +322,21 @@ fun FilterScreen(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
-                            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            ) {
                                 Text(
                                     text = "Sort By",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    items(sortOptions) { option ->
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    sortOptions.forEach { option ->
                                         FilterChip(
                                             selected = sortBy == option,
                                             onClick = {
@@ -345,9 +379,7 @@ fun FilterScreen(
                                         minYear = minYear.takeIf { it > meta.yearRange.min },
                                         maxYear = maxYear.takeIf { it < meta.yearRange.max },
                                         sortBy = sortBy,
-                                        sortDirection = sortDirection,
-                                        page = 1,
-                                        pageSize = 100
+                                        sortDirection = sortDirection
                                     )
                                 )
                             },

@@ -50,21 +50,17 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Navigation
     implementation(libs.navigation.compose)
 
-    // Ktor client
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.serialization)
     implementation(libs.ktor.client.logging)
 
-    // Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
-    // DataStore
     implementation(libs.datastore.preferences)
 
     implementation("io.ktor:ktor-client-core:3.0.3")

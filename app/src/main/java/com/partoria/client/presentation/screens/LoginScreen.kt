@@ -24,7 +24,6 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
-
     val currentState = uiState
 
     LaunchedEffect(currentState) {
