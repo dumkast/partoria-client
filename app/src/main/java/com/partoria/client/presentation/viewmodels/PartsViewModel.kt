@@ -35,6 +35,10 @@ class PartsViewModel(
     private val _currentFilter = MutableStateFlow<Filter?>(null)
     val currentFilter: StateFlow<Filter?> = _currentFilter.asStateFlow()
 
+    init {
+        loadParts()
+    }
+
     fun loadParts() {
         viewModelScope.launch {
             _partsState.value = PartsUiState.Loading

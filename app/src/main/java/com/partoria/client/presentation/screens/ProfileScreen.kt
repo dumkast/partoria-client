@@ -2,7 +2,6 @@ package com.partoria.client.presentation.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,8 +15,7 @@ import com.partoria.client.presentation.viewmodels.AuthViewModel
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
-    onLogout: () -> Unit,
-    onBack: () -> Unit
+    onLogout: () -> Unit
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     val username by authViewModel.getUsername().collectAsStateWithLifecycle(initialValue = "")
@@ -26,12 +24,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profile") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+                title = { Text("Profile") }
             )
         }
     ) { paddingValues ->

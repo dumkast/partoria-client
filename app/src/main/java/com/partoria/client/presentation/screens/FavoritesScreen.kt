@@ -3,8 +3,6 @@ package com.partoria.client.presentation.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,8 +16,7 @@ import com.partoria.client.presentation.viewmodels.PartsViewModel
 @Composable
 fun FavoritesScreen(
     partsViewModel: PartsViewModel,
-    onPartClick: (Int) -> Unit,
-    onBack: () -> Unit
+    onPartClick: (Int) -> Unit
 ) {
     val favoritesState by partsViewModel.favoritesState.collectAsStateWithLifecycle()
 
@@ -30,12 +27,7 @@ fun FavoritesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Favorites") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+                title = { Text("Favorites") }
             )
         }
     ) { paddingValues ->
@@ -59,7 +51,12 @@ fun FavoritesScreen(
                         )
                     } else {
                         LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
+                            contentPadding = PaddingValues(
+                                top = 6.dp,
+                                start = 16.dp,
+                                end = 16.dp,
+                                bottom = 90.dp
+                            ),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(state.favorites) { part ->

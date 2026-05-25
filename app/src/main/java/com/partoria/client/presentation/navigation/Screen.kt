@@ -1,13 +1,25 @@
 package com.partoria.client.presentation.navigation
 
-sealed class Screen(val route: String) {
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.graphics.vector.ImageVector
+
+sealed class Screen(val route: String, val icon: ImageVector? = null, val label: String? = null) {
     object Login : Screen("login")
     object Register : Screen("register")
-    object Home : Screen("home")
+    object Home : Screen("home", Icons.Default.Home, "Catalog")
     object PartDetail : Screen("part_detail/{partId}") {
         fun createRoute(partId: Int): String = "part_detail/$partId"
     }
-    object Favorites : Screen("favorites")
-    object Profile : Screen("profile")
+    object Favorites : Screen("favorites", Icons.Default.FavoriteBorder, "Favorites")
+    object Profile : Screen("profile", Icons.Default.Person, "Profile")
     object Filter : Screen("filter")
 }
+
+val bottomNavScreens = listOf(
+    Screen.Home,
+    Screen.Favorites,
+    Screen.Profile
+)
