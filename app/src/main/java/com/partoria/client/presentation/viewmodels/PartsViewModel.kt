@@ -56,9 +56,23 @@ class PartsViewModel(
         viewModelScope.launch {
             _partsState.value = PartsUiState.Loading
             try {
-                _currentFilter.value = filter
-                val parts = getFilteredPartsUseCase(filter)
-                _partsState.value = PartsUiState.Success(parts)
+                val isEmptyFilter = filter.categories.isNullOrEmpty() &&
+                        filter.brands.isNullOrEmpty() &&
+                        filter.minPrice == null &&
+                        filter.maxPrice == null &&
+                        filter.minYear == null &&
+                        filter.maxYear == null &&
+                        filter.sortBy == null
+
+                if (isEmptyFilter) {
+                    _currentFilter.value = null
+                    val parts = getAllPartsUseCase()
+                    _partsState.value = PartsUiState.Success(parts)
+                } else {
+                    _currentFilter.value = filter
+                    val parts = getFilteredPartsUseCase(filter)
+                    _partsState.value = PartsUiState.Success(parts)
+                }
             } catch (e: Exception) {
                 _partsState.value = PartsUiState.Error(e.message ?: "Unknown error")
             }
@@ -79,7 +93,10 @@ class PartsViewModel(
     }
 
     fun resetFilters() {
-        loadParts()
+        viewModelScope.launch {
+            _currentFilter.value = null
+            loadParts()
+        }
     }
 
     fun loadPartDetails(partId: Int, onResult: (ComputerPart?) -> Unit) {
