@@ -119,4 +119,13 @@ class ApiServiceImpl(
             }
         }.body()
     }
+
+    override suspend fun deletePart(token: String, partId: Int) {
+        client.delete {
+            url("$baseUrl/admin/parts/$partId")
+            headers {
+                append(HttpHeaders.Authorization, "Bearer $token")
+            }
+        }
+    }
 }

@@ -137,9 +137,7 @@ fun NavGraph(
             }
 
             composable(Screen.Admin.route) {
-                AdminScreen(
-                    // TO DO
-                )
+                AdminScreen(partsViewModel = partsViewModel)
             }
 
             composable(Screen.Filter.route) {

@@ -20,7 +20,8 @@ class PartsViewModel(
     private val addToFavoritesUseCase: AddToFavoritesUseCase,
     private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
     private val getFavoritesUseCase: GetFavoritesUseCase,
-    private val searchPartsUseCase: SearchPartsUseCase
+    private val searchPartsUseCase: SearchPartsUseCase,
+    private val deletePartUseCase: DeletePartUseCase
 ) : ViewModel() {
 
     private val _partsState = MutableStateFlow<PartsUiState>(PartsUiState.Loading)
@@ -173,6 +174,18 @@ class PartsViewModel(
                 onResult(favorites.any { it.id == partId })
             } catch (e: Exception) {
                 onResult(false)
+            }
+        }
+    }
+
+    fun deletePart(partId: Int, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                deletePartUseCase(partId)
+                loadParts()
+                loadFavorites()
+                onSuccess()
+            } catch (e: Exception) {
             }
         }
     }

@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
         val removeFromFavoritesUseCase = RemoveFromFavoritesUseCase(partRepository)
         val getFavoritesUseCase = GetFavoritesUseCase(partRepository)
         val searchPartsUseCase = SearchPartsUseCase(partRepository)
+        val deletePartUseCase = DeletePartUseCase(partRepository)
 
         partsViewModel = PartsViewModel(
             getAllPartsUseCase,
@@ -70,7 +71,8 @@ class MainActivity : ComponentActivity() {
             addToFavoritesUseCase,
             removeFromFavoritesUseCase,
             getFavoritesUseCase,
-            searchPartsUseCase
+            searchPartsUseCase,
+            deletePartUseCase
         )
 
         setContent {

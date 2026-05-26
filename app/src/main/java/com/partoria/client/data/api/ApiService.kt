@@ -14,4 +14,5 @@ interface ApiService {
     suspend fun addToFavorites(token: String, partId: Int)
     suspend fun removeFromFavorites(token: String, partId: Int)
     suspend fun searchParts(token: String, query: String): PartsResponse
+    suspend fun deletePart(token: String, partId: Int)
 }

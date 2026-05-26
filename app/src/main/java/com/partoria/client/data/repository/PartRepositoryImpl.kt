@@ -100,6 +100,11 @@ class PartRepositoryImpl(
         return response.items.map { it.toDomain() }
     }
 
+    override suspend fun deletePart(partId: Int) {
+        val token = getToken()
+        apiService.deletePart(token, partId)
+    }
+
     private fun com.partoria.client.data.model.PartResponse.toDomain(): ComputerPart {
         return ComputerPart(
             id = id,

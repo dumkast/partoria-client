@@ -14,4 +14,5 @@ interface PartRepository {
     suspend fun removeFromFavorites(partId: Int)
     suspend fun getFavorites(): List<ComputerPart>
     suspend fun searchParts(query: String): List<ComputerPart>
+    suspend fun deletePart(partId: Int)
 }
