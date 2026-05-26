@@ -69,6 +69,8 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
     implementation("io.ktor:ktor-client-logging:3.0.3")
 
+    implementation("androidx.compose.material:material:1.7.5")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

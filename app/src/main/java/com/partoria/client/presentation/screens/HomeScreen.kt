@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,8 @@ fun HomeScreen(
     val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
     val currentFilter by partsViewModel.currentFilter.collectAsStateWithLifecycle()
     val favoritesState by partsViewModel.favoritesState.collectAsStateWithLifecycle()
+
+    val isRefreshing by partsViewModel.isRefreshing.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
 
@@ -119,15 +122,12 @@ fun HomeScreen(
                 )
             )
 
-            Box(
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { partsViewModel.loadParts() },
                 modifier = Modifier.fillMaxSize()
             ) {
                 when (val state = partsState) {
-                    is PartsUiState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
                     is PartsUiState.Success -> {
                         if (state.parts.isEmpty()) {
                             Column(
@@ -186,10 +186,18 @@ fun HomeScreen(
                             }
                         }
                     }
+                    is PartsUiState.Loading -> {
+                        if (state is PartsUiState.Loading && partsState is PartsUiState.Loading && !isRefreshing) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
                     is PartsUiState.Error -> {
                         Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
                             Text(
                                 text = state.message,

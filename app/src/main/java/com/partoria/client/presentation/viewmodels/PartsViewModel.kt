@@ -35,19 +35,28 @@ class PartsViewModel(
     private val _currentFilter = MutableStateFlow<Filter?>(null)
     val currentFilter: StateFlow<Filter?> = _currentFilter.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     init {
         loadParts()
     }
 
     fun loadParts() {
         viewModelScope.launch {
-            _partsState.value = PartsUiState.Loading
+            _isRefreshing.value = true
             try {
-                _currentFilter.value = null
-                val parts = getAllPartsUseCase()
+                val filter = _currentFilter.value
+                val parts = if (filter != null) {
+                    getFilteredPartsUseCase(filter)
+                } else {
+                    getAllPartsUseCase()
+                }
                 _partsState.value = PartsUiState.Success(parts)
             } catch (e: Exception) {
                 _partsState.value = PartsUiState.Error(e.message ?: "Unknown error")
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }
