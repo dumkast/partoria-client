@@ -16,6 +16,7 @@ import androidx.navigation.navArgument
 import com.partoria.client.presentation.screens.*
 import com.partoria.client.presentation.viewmodels.AuthViewModel
 import com.partoria.client.presentation.viewmodels.PartsViewModel
+import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +26,8 @@ fun NavGraph(
 ) {
     val navController = rememberNavController()
     val isLoggedIn by authViewModel.isLoggedIn().collectAsState(initial = false)
+    val userRole by authViewModel.getUserRole().collectAsState(initial = "")
+    val isAdmin = userRole == "admin"
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -49,7 +52,12 @@ fun NavGraph(
         bottomBar = {
             if (shouldShowBottomBar) {
                 NavigationBar {
-                    bottomNavScreens.forEach { screen ->
+                    val screens = if (isAdmin) {
+                        listOf(Screen.Home, Screen.Favorites, Screen.Admin, Screen.Profile)
+                    } else {
+                        listOf(Screen.Home, Screen.Favorites, Screen.Profile)
+                    }
+                    screens.forEach { screen ->
                         NavigationBarItem(
                             icon = { screen.icon?.let { Icon(it, contentDescription = screen.label) } },
                             label = { Text(screen.label ?: "") },
@@ -125,6 +133,12 @@ fun NavGraph(
                             popUpTo(0) { inclusive = true }
                         }
                     }
+                )
+            }
+
+            composable(Screen.Admin.route) {
+                AdminScreen(
+                    // TO DO
                 )
             }
 

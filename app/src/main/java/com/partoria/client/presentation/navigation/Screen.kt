@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val icon: ImageVector? = null, val label: String? = null) {
@@ -16,10 +17,12 @@ sealed class Screen(val route: String, val icon: ImageVector? = null, val label:
     object Favorites : Screen("favorites", Icons.Default.FavoriteBorder, "Favorites")
     object Profile : Screen("profile", Icons.Default.Person, "Profile")
     object Filter : Screen("filter")
+    object Admin : Screen("admin", Icons.Default.AdminPanelSettings, "Admin")
 }
 
 val bottomNavScreens = listOf(
     Screen.Home,
     Screen.Favorites,
-    Screen.Profile
+    Screen.Profile,
+    Screen.Admin
 )
