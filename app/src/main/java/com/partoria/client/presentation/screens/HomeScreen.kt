@@ -32,12 +32,20 @@ fun HomeScreen(
     onFilterClick: () -> Unit
 ) {
     val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
-    val currentFilter by partsViewModel.currentFilter.collectAsStateWithLifecycle()
+    val activeFilter by partsViewModel.activeFilter.collectAsStateWithLifecycle()
     val favoritesState by partsViewModel.favoritesState.collectAsStateWithLifecycle()
 
     val isRefreshing by partsViewModel.isRefreshing.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
+
+    LaunchedEffect(activeFilter.searchQuery) {
+        searchQuery = activeFilter.searchQuery ?: ""
+    }
+
+    LaunchedEffect(activeFilter) {
+        println("activeFilter: categories=${activeFilter.categories}, brands=${activeFilter.brands}, minPrice=${activeFilter.minPrice}, sortBy=${activeFilter.sortBy}")
+    }
 
     val favoritesIds = remember(favoritesState) {
         val state = favoritesState
@@ -48,15 +56,13 @@ fun HomeScreen(
         }
     }
 
-    val isFilterActive = currentFilter != null && (
-            currentFilter?.categories?.isNotEmpty() == true ||
-                    currentFilter?.brands?.isNotEmpty() == true ||
-                    currentFilter?.minPrice != null ||
-                    currentFilter?.maxPrice != null ||
-                    currentFilter?.minYear != null ||
-                    currentFilter?.maxYear != null ||
-                    currentFilter?.sortBy != null
-            )
+    val isFilterActive = activeFilter.categories?.isNotEmpty() == true ||
+            activeFilter.brands?.isNotEmpty() == true ||
+            activeFilter.minPrice != null ||
+            activeFilter.maxPrice != null ||
+            activeFilter.minYear != null ||
+            activeFilter.maxYear != null ||
+            activeFilter.sortBy != null
 
     LaunchedEffect(Unit) {
         partsViewModel.loadFavorites()
@@ -92,11 +98,7 @@ fun HomeScreen(
                 value = searchQuery,
                 onValueChange = { query ->
                     searchQuery = query
-                    if (query.isNotEmpty()) {
-                        partsViewModel.searchParts(query)
-                    } else {
-                        partsViewModel.loadParts()
-                    }
+                    partsViewModel.updateSearchQuery(query)
                 },
                 placeholder = { Text("Search by name, brand...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
@@ -104,7 +106,7 @@ fun HomeScreen(
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = {
                             searchQuery = ""
-                            partsViewModel.loadParts()
+                            partsViewModel.updateSearchQuery("")
                         }) {
                             Icon(Icons.Default.Clear, contentDescription = "Clear")
                         }
@@ -145,7 +147,7 @@ fun HomeScreen(
                                     Button(
                                         onClick = {
                                             searchQuery = ""
-                                            partsViewModel.loadParts()
+                                            partsViewModel.updateSearchQuery("")
                                         }
                                     ) {
                                         Text("Clear search")

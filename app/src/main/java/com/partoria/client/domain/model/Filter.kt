@@ -1,6 +1,7 @@
 package com.partoria.client.domain.model
 
 data class Filter(
+    val searchQuery: String? = null,
     val categories: List<String>? = null,
     val brands: List<String>? = null,
     val minPrice: Double? = null,

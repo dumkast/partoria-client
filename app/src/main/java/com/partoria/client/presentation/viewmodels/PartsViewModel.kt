@@ -32,8 +32,8 @@ class PartsViewModel(
     private val _filtersMetaState = MutableStateFlow<FiltersMetaUiState>(FiltersMetaUiState.Loading)
     val filtersMetaState: StateFlow<FiltersMetaUiState> = _filtersMetaState.asStateFlow()
 
-    private val _currentFilter = MutableStateFlow<Filter?>(null)
-    val currentFilter: StateFlow<Filter?> = _currentFilter.asStateFlow()
+    private val _activeFilter = MutableStateFlow(Filter())
+    val activeFilter: StateFlow<Filter> = _activeFilter.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -46,11 +46,18 @@ class PartsViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
-                val filter = _currentFilter.value
-                val parts = if (filter != null) {
-                    getFilteredPartsUseCase(filter)
-                } else {
+                val filter = _activeFilter.value
+                val isEmpty = filter.searchQuery.isNullOrBlank() &&
+                        filter.categories.isNullOrEmpty() &&
+                        filter.brands.isNullOrEmpty() &&
+                        filter.minPrice == null && filter.maxPrice == null &&
+                        filter.minYear == null && filter.maxYear == null &&
+                        filter.sortBy == null
+
+                val parts = if (isEmpty) {
                     getAllPartsUseCase()
+                } else {
+                    getFilteredPartsUseCase(filter)
                 }
                 _partsState.value = PartsUiState.Success(parts)
             } catch (e: Exception) {
@@ -62,50 +69,26 @@ class PartsViewModel(
     }
 
     fun loadFilteredParts(filter: Filter) {
-        viewModelScope.launch {
-            _partsState.value = PartsUiState.Loading
-            try {
-                val isEmptyFilter = filter.categories.isNullOrEmpty() &&
-                        filter.brands.isNullOrEmpty() &&
-                        filter.minPrice == null &&
-                        filter.maxPrice == null &&
-                        filter.minYear == null &&
-                        filter.maxYear == null &&
-                        filter.sortBy == null
+        val currentSearch = _activeFilter.value.searchQuery
+        _activeFilter.value = filter.copy(searchQuery = currentSearch)
+        loadParts()
+    }
 
-                if (isEmptyFilter) {
-                    _currentFilter.value = null
-                    val parts = getAllPartsUseCase()
-                    _partsState.value = PartsUiState.Success(parts)
-                } else {
-                    _currentFilter.value = filter
-                    val parts = getFilteredPartsUseCase(filter)
-                    _partsState.value = PartsUiState.Success(parts)
-                }
-            } catch (e: Exception) {
-                _partsState.value = PartsUiState.Error(e.message ?: "Unknown error")
-            }
-        }
+    fun updateSearchQuery(query: String) {
+        _activeFilter.value = _activeFilter.value.copy(
+            searchQuery = query.takeIf { it.isNotBlank() }
+        )
+        loadParts()
     }
 
     fun searchParts(query: String) {
-        viewModelScope.launch {
-            _partsState.value = PartsUiState.Loading
-            try {
-                _currentFilter.value = null
-                val parts = searchPartsUseCase(query)
-                _partsState.value = PartsUiState.Success(parts)
-            } catch (e: Exception) {
-                _partsState.value = PartsUiState.Error(e.message ?: "Unknown error")
-            }
-        }
+        updateSearchQuery(query)
     }
 
     fun resetFilters() {
-        viewModelScope.launch {
-            _currentFilter.value = null
-            loadParts()
-        }
+        val currentSearch = _activeFilter.value.searchQuery
+        _activeFilter.value = Filter(searchQuery = currentSearch)
+        loadParts()
     }
 
     fun loadPartDetails(partId: Int, onResult: (ComputerPart?) -> Unit) {

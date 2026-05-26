@@ -23,6 +23,7 @@ data class PartDetailResponse(
 
 @Serializable
 data class FilterRequest(
+    val searchQuery: String? = null,
     val categories: List<String>? = null,
     val brands: List<String>? = null,
     val minPrice: Double? = null,

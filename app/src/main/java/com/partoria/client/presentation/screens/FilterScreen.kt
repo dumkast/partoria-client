@@ -26,7 +26,7 @@ fun FilterScreen(
     onBack: () -> Unit
 ) {
     val filtersMetaState by partsViewModel.filtersMetaState.collectAsStateWithLifecycle()
-    val savedFilter by partsViewModel.currentFilter.collectAsStateWithLifecycle()
+    val savedFilter by partsViewModel.activeFilter.collectAsStateWithLifecycle()
 
     var selectedCategories by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedBrands by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -125,8 +125,8 @@ fun FilterScreen(
                                 Filter(
                                     categories = selectedCategories.takeIf { it.isNotEmpty() },
                                     brands = selectedBrands.takeIf { it.isNotEmpty() },
-                                    minPrice = minP.takeIf { minP > meta.priceRange.min },
-                                    maxPrice = maxP.takeIf { maxP < meta.priceRange.max },
+                                    minPrice = minP.takeIf { minP > meta.priceRange.min + 0.01 },
+                                    maxPrice = maxP.takeIf { maxP < meta.priceRange.max - 0.01 },
                                     minYear = minY.takeIf { minY > meta.yearRange.min },
                                     maxYear = maxY.takeIf { maxY < meta.yearRange.max },
                                     sortBy = sortBy,

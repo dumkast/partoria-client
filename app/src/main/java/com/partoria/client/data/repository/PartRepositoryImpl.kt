@@ -45,6 +45,7 @@ class PartRepositoryImpl(
         println("FILTER REQUEST: $filter")
         val token = getToken()
         val request = FilterRequest(
+            searchQuery = filter.searchQuery,
             categories = filter.categories,
             brands = filter.brands,
             minPrice = filter.minPrice,
