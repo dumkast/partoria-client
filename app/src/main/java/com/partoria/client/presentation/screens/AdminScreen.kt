@@ -24,7 +24,8 @@ import com.partoria.client.presentation.viewmodels.PartsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminScreen(
-    partsViewModel: PartsViewModel
+    partsViewModel: PartsViewModel,
+    onNavigateToCreate: () -> Unit
 ) {
     val activeFilter by partsViewModel.activeFilter.collectAsStateWithLifecycle()
     val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
@@ -48,7 +49,7 @@ fun AdminScreen(
             TopAppBar(
                 title = { Text("Admin Panel") },
                 actions = {
-                    IconButton(onClick = { /* TODO: создать деталь */ }) {
+                    IconButton(onClick = { onNavigateToCreate() }) {
                         Icon(Icons.Default.Add, contentDescription = "Add")
                     }
                 }

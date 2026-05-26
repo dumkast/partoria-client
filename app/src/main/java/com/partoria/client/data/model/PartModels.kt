@@ -60,6 +60,23 @@ data class YearRange(
 )
 
 @Serializable
+data class CreatePartRequest(
+    val name: String,
+    val category: String,
+    val brand: String,
+    val price: Double,
+    val specs: String,
+    val releaseYear: Int,
+    val details: List<PartDetailRequest> = emptyList()
+)
+
+@Serializable
+data class PartDetailRequest(
+    val specification: String,
+    val value: String
+)
+
+@Serializable
 data class ErrorResponse(
     val error: String,
     val message: String

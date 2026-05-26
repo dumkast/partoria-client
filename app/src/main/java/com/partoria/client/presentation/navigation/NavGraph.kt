@@ -137,7 +137,17 @@ fun NavGraph(
             }
 
             composable(Screen.Admin.route) {
-                AdminScreen(partsViewModel = partsViewModel)
+                AdminScreen(
+                    partsViewModel = partsViewModel,
+                    onNavigateToCreate = { navController.navigate(Screen.AdminPartForm.route) }
+                )
+            }
+
+            composable(Screen.AdminPartForm.route) {
+                AdminPartFormScreen(
+                    partsViewModel = partsViewModel,
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable(Screen.Filter.route) {

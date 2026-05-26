@@ -18,6 +18,7 @@ sealed class Screen(val route: String, val icon: ImageVector? = null, val label:
     object Profile : Screen("profile", Icons.Default.Person, "Profile")
     object Filter : Screen("filter")
     object Admin : Screen("admin", Icons.Default.AdminPanelSettings, "Admin")
+    object AdminPartForm : Screen("admin_part_form")
 }
 
 val bottomNavScreens = listOf(

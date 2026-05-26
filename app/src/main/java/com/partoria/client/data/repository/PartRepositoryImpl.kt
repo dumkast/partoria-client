@@ -1,11 +1,16 @@
 package com.partoria.client.data.repository
 
 import com.partoria.client.data.api.ApiService
+import com.partoria.client.data.model.CreatePartRequest
 import com.partoria.client.data.model.FilterRequest
+import com.partoria.client.data.model.PartDetailRequest
+import com.partoria.client.data.model.PartResponse
 import com.partoria.client.domain.model.ComputerPart
 import com.partoria.client.domain.model.Filter
 import com.partoria.client.domain.model.FilterMeta
 import com.partoria.client.domain.model.PartDetail
+import com.partoria.client.domain.model.PriceRange
+import com.partoria.client.domain.model.YearRange
 import com.partoria.client.domain.repository.PartRepository
 
 class PartRepositoryImpl(
@@ -66,11 +71,11 @@ class PartRepositoryImpl(
         return FilterMeta(
             categories = response.categories,
             brands = response.brands,
-            priceRange = com.partoria.client.domain.model.PriceRange(
+            priceRange = PriceRange(
                 min = response.priceRange.min,
                 max = response.priceRange.max
             ),
-            yearRange = com.partoria.client.domain.model.YearRange(
+            yearRange = YearRange(
                 min = response.yearRange.min,
                 max = response.yearRange.max
             )
@@ -105,7 +110,30 @@ class PartRepositoryImpl(
         apiService.deletePart(token, partId)
     }
 
-    private fun com.partoria.client.data.model.PartResponse.toDomain(): ComputerPart {
+    override suspend fun createPart(
+        name: String,
+        category: String,
+        brand: String,
+        price: Double,
+        specs: String,
+        releaseYear: Int,
+        details: List<PartDetailRequest>
+    ): Int {
+        val token = getToken()
+        val request = CreatePartRequest(
+            name = name,
+            category = category,
+            brand = brand,
+            price = price,
+            specs = specs,
+            releaseYear = releaseYear,
+            details = details
+        )
+        val response = apiService.createPart(token, request)
+        return response.id
+    }
+
+    private fun PartResponse.toDomain(): ComputerPart {
         return ComputerPart(
             id = id,
             name = name,

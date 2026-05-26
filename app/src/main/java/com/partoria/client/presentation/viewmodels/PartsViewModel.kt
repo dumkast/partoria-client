@@ -2,6 +2,7 @@ package com.partoria.client.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.partoria.client.data.model.PartDetailRequest
 import com.partoria.client.domain.model.ComputerPart
 import com.partoria.client.domain.model.Filter
 import com.partoria.client.domain.model.FilterMeta
@@ -21,7 +22,8 @@ class PartsViewModel(
     private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
     private val getFavoritesUseCase: GetFavoritesUseCase,
     private val searchPartsUseCase: SearchPartsUseCase,
-    private val deletePartUseCase: DeletePartUseCase
+    private val deletePartUseCase: DeletePartUseCase,
+    private val createPartUseCase: CreatePartUseCase
 ) : ViewModel() {
 
     private val _partsState = MutableStateFlow<PartsUiState>(PartsUiState.Loading)
@@ -186,6 +188,28 @@ class PartsViewModel(
                 loadFavorites()
                 onSuccess()
             } catch (e: Exception) {
+            }
+        }
+    }
+
+    fun createPart(
+        name: String,
+        category: String,
+        brand: String,
+        price: Double,
+        specs: String,
+        releaseYear: Int,
+        details: List<PartDetailRequest>,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                createPartUseCase(name, category, brand, price, specs, releaseYear, details)
+                loadParts()
+                onSuccess()
+            } catch (e: Exception) {
+                onError()
             }
         }
     }

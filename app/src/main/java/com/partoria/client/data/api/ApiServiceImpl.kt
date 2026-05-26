@@ -128,4 +128,13 @@ class ApiServiceImpl(
             }
         }
     }
+
+    override suspend fun createPart(token: String, part: CreatePartRequest): PartResponse {
+        return client.post {
+            url("$baseUrl/admin/parts")
+            contentType(io.ktor.http.ContentType.Application.Json)
+            headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            setBody(part)
+        }.body()
+    }
 }
