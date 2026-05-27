@@ -18,6 +18,7 @@ import com.partoria.client.presentation.viewmodels.PartsUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 import com.partoria.client.presentation.components.SearchBar
 import com.partoria.client.presentation.components.PartCard
+import com.partoria.client.presentation.viewmodels.FiltersMetaUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,10 +34,18 @@ fun AdminScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val searchQuery by partsViewModel.adminSearchQuery.collectAsStateWithLifecycle()
-    val selectedCategory by partsViewModel.adminSelectedCategory.collectAsStateWithLifecycle()
-    val filteredParts by partsViewModel.filteredAdminParts.collectAsStateWithLifecycle()
     val allParts = (adminPartsState as? PartsUiState.Success)?.parts ?: emptyList()
-    val categories = allParts.map { it.category }.distinct().sorted()
+
+    val filtersMetaState by partsViewModel.filtersMetaState.collectAsStateWithLifecycle()
+    val categories = (filtersMetaState as? FiltersMetaUiState.Success)?.meta?.categories ?: emptyList()
+    val adminFilter by partsViewModel.adminFilter.collectAsStateWithLifecycle()
+    val selectedCategory = adminFilter.categories?.firstOrNull()
+
+    LaunchedEffect(Unit) {
+        if (filtersMetaState is FiltersMetaUiState.Loading) {
+            partsViewModel.loadFiltersMeta()
+        }
+    }
 
     LaunchedEffect(Unit) {
         partsViewModel.uiEvent.collect { message ->
@@ -47,17 +56,14 @@ fun AdminScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        partsViewModel.loadAdminParts()
-    }
-
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 80.dp)) },
+                modifier = Modifier.padding(bottom = 80.dp))
+        },
         topBar = {
             TopAppBar(
-                title = { Text("Admin Panel (${filteredParts.size}/${allParts.size})") },
+                title = { Text("Admin Panel (${allParts.size})") },
                 actions = {
                     IconButton(onClick = { onNavigateToCreate() }) {
                         Icon(Icons.Default.Add, contentDescription = "Add")
@@ -100,6 +106,7 @@ fun AdminScreen(
                     }
                 }
             }
+
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
                 onRefresh = { partsViewModel.loadAdminParts(isSwipe = true) },
@@ -117,22 +124,23 @@ fun AdminScreen(
                         }
                     }
                     is PartsUiState.Success -> {
-                        if (filteredParts.isEmpty()) {
+                        if (allParts.isEmpty()) {
                             Column(
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "No parts found",
+                                    text = if (searchQuery.isNotEmpty() || selectedCategory != null)
+                                        "No matching parts found"
+                                    else
+                                        "No parts found",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
-                                Button(
-                                    onClick = onNavigateToCreate
-                                ) {
-                                    Text("Create first part")
+                                Button(onClick = onNavigateToCreate) {
+                                    Text("Create part")
                                 }
                             }
                         } else {
@@ -145,7 +153,7 @@ fun AdminScreen(
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                items(filteredParts) { part ->
+                                items(allParts) { part ->
                                     PartCard(
                                         part = part,
                                         onClick = { onNavigateToEdit(part.id) },

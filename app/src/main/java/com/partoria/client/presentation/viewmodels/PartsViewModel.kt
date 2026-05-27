@@ -7,13 +7,16 @@ import com.partoria.client.domain.model.ComputerPart
 import com.partoria.client.domain.model.Filter
 import com.partoria.client.domain.model.FilterMeta
 import com.partoria.client.domain.usecase.part.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 
@@ -69,37 +72,28 @@ class PartsViewModel(
     private val _adminPartsState = MutableStateFlow<PartsUiState>(PartsUiState.Loading)
     val adminPartsState: StateFlow<PartsUiState> = _adminPartsState.asStateFlow()
 
-    private val _adminSearchQuery = MutableStateFlow("")
-    val adminSearchQuery: StateFlow<String> = _adminSearchQuery.asStateFlow()
+    private val _adminFilter = MutableStateFlow(Filter())
+    val adminFilter: StateFlow<Filter> = _adminFilter.asStateFlow()
 
-    private val _adminSelectedCategory = MutableStateFlow<String?>(null)
-    val adminSelectedCategory: StateFlow<String?> = _adminSelectedCategory.asStateFlow()
-
-    val filteredAdminParts: StateFlow<List<ComputerPart>> = combine(
-        adminPartsState,
-        _adminSearchQuery,
-        _adminSelectedCategory
-    ) { state, query, category ->
-        if (state is PartsUiState.Success) {
-            var parts = state.parts
-            if (query.isNotBlank()) {
-                parts = parts.filter {
-                    it.name.contains(query, ignoreCase = true) ||
-                            it.brand.contains(query, ignoreCase = true)
-                }
-            }
-            category?.let { cat ->
-                parts = parts.filter { it.category == cat }
-            }
-            parts
-        } else {
-            emptyList()
-        }
-    }.stateIn(
+    val adminSearchQuery: StateFlow<String> = _adminFilter.map { it.searchQuery ?: "" }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
+        initialValue = ""
     )
+
+    fun updateAdminSearchQuery(query: String) {
+        _adminFilter.value = _adminFilter.value.copy(
+            searchQuery = query.takeIf { it.isNotBlank() }
+        )
+        loadAdminParts()
+    }
+
+    fun selectAdminCategory(category: String?) {
+        _adminFilter.value = _adminFilter.value.copy(
+            categories = if (category != null) listOf(category) else null
+        )
+        loadAdminParts()
+    }
 
     fun loadAdminParts(isSwipe: Boolean = false) {
         viewModelScope.launch {
@@ -109,7 +103,14 @@ class PartsViewModel(
                 _adminPartsState.value = PartsUiState.Loading
             }
             try {
-                val parts = getAllPartsUseCase()
+                val filter = _adminFilter.value
+                val isEmpty = filter.searchQuery.isNullOrBlank() && filter.categories.isNullOrEmpty()
+
+                val parts = if (isEmpty) {
+                    getAllPartsUseCase()
+                } else {
+                    getFilteredPartsUseCase(filter)
+                }
                 _adminPartsState.value = PartsUiState.Success(parts)
             } catch (e: Exception) {
                 _adminPartsState.value = PartsUiState.Error(e.message ?: "Unknown error")
@@ -136,6 +137,7 @@ class PartsViewModel(
     }
     init {
         loadParts()
+        loadAdminParts()
     }
 
     fun loadParts(isSwipe: Boolean = false) {
@@ -364,14 +366,6 @@ class PartsViewModel(
                 onError()
             }
         }
-    }
-
-    fun updateAdminSearchQuery(query: String) {
-        _adminSearchQuery.value = query
-    }
-
-    fun selectAdminCategory(category: String?) {
-        _adminSelectedCategory.value = category
     }
 }
 
