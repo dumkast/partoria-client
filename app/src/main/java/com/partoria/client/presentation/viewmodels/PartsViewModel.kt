@@ -12,6 +12,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+data class PartFormState(
+    val name: String = "",
+    val category: String = "",
+    val brand: String = "",
+    val price: String = "",
+    val specs: String = "",
+    val releaseYear: String = "",
+    val details: List<Pair<String, String>> = emptyList()
+)
+
 class PartsViewModel(
     private val getAllPartsUseCase: GetAllPartsUseCase,
     private val getPartByIdUseCase: GetPartByIdUseCase,
@@ -41,6 +51,16 @@ class PartsViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _partFormState = MutableStateFlow(PartFormState())
+    val partFormState: StateFlow<PartFormState> = _partFormState.asStateFlow()
+
+    fun updatePartFormField(update: (PartFormState) -> PartFormState) {
+        _partFormState.value = update(_partFormState.value)
+    }
+
+    fun clearPartFormState() {
+        _partFormState.value = PartFormState()
+    }
     init {
         loadParts()
     }

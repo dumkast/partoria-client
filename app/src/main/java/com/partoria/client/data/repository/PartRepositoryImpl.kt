@@ -129,8 +129,7 @@ class PartRepositoryImpl(
             releaseYear = releaseYear,
             details = details
         )
-        val response = apiService.createPart(token, request)
-        return response.id
+        return apiService.createPart(token, request)
     }
 
     private fun PartResponse.toDomain(): ComputerPart {
