@@ -23,6 +23,7 @@ import com.partoria.client.presentation.viewmodels.PartsUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 import com.partoria.client.utils.CategoryIcon
 import com.partoria.client.presentation.components.SearchBar
+import com.partoria.client.presentation.components.PartCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -189,81 +190,6 @@ fun HomeScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun PartCard(
-    part: ComputerPart,
-    onClick: () -> Unit,
-    isFavorite: Boolean,
-    onFavoriteClick: (Boolean) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier.size(56.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = CategoryIcon.getIcon(part.category),
-                    contentDescription = part.category,
-                    modifier = Modifier.size(40.dp),
-                    tint = CategoryIcon.getColor(part.category)
-                )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = part.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "${part.brand} • ${part.category}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "$${part.price}",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "Released: ${part.releaseYear}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            IconButton(
-                onClick = { onFavoriteClick(isFavorite) }
-            ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(28.dp)
-                )
             }
         }
     }
