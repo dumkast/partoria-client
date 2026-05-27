@@ -43,10 +43,6 @@ fun HomeScreen(
         searchQuery = activeFilter.searchQuery ?: ""
     }
 
-    LaunchedEffect(activeFilter) {
-        println("activeFilter: categories=${activeFilter.categories}, brands=${activeFilter.brands}, minPrice=${activeFilter.minPrice}, sortBy=${activeFilter.sortBy}")
-    }
-
     val favoritesIds = remember(favoritesState) {
         val state = favoritesState
         if (state is FavoritesUiState.Success) {
@@ -126,7 +122,7 @@ fun HomeScreen(
 
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
-                onRefresh = { partsViewModel.loadParts() },
+                onRefresh = { partsViewModel.loadParts(isSwipe = true) },
                 modifier = Modifier.fillMaxSize()
             ) {
                 when (val state = partsState) {
@@ -189,8 +185,11 @@ fun HomeScreen(
                         }
                     }
                     is PartsUiState.Loading -> {
-                        if (state is PartsUiState.Loading && partsState is PartsUiState.Loading && !isRefreshing) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        if (!isRefreshing) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 CircularProgressIndicator()
                             }
                         }

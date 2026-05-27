@@ -3,11 +3,14 @@ package com.partoria.client.presentation.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -28,14 +31,17 @@ fun AdminScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToEdit: (Int) -> Unit
 ) {
-    val activeFilter by partsViewModel.activeFilter.collectAsStateWithLifecycle()
-    val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
+    val adminPartsState by partsViewModel.adminPartsState.collectAsStateWithLifecycle()
     val isRefreshing by partsViewModel.isRefreshing.collectAsStateWithLifecycle()
     var showDeleteDialog by remember { mutableStateOf<ComputerPart?>(null) }
 
-    val savedFilter = remember { activeFilter }
-
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val searchQuery by partsViewModel.adminSearchQuery.collectAsStateWithLifecycle()
+    val selectedCategory by partsViewModel.adminSelectedCategory.collectAsStateWithLifecycle()
+    val filteredParts by partsViewModel.filteredAdminParts.collectAsStateWithLifecycle()
+    val allParts = (adminPartsState as? PartsUiState.Success)?.parts ?: emptyList()
+    val categories = allParts.map { it.category }.distinct().sorted()
 
     LaunchedEffect(Unit) {
         partsViewModel.uiEvent.collect { message ->
@@ -47,13 +53,7 @@ fun AdminScreen(
     }
 
     LaunchedEffect(Unit) {
-        partsViewModel.resetFilters()
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            partsViewModel.loadFilteredParts(savedFilter)
-        }
+        partsViewModel.loadAdminParts()
     }
 
     Scaffold(
@@ -62,7 +62,7 @@ fun AdminScreen(
                 modifier = Modifier.padding(bottom = 80.dp)) },
         topBar = {
             TopAppBar(
-                title = { Text("Admin Panel") },
+                title = { Text("Admin Panel (${filteredParts.size}/${allParts.size})") },
                 actions = {
                     IconButton(onClick = { onNavigateToCreate() }) {
                         Icon(Icons.Default.Add, contentDescription = "Add")
@@ -76,12 +76,56 @@ fun AdminScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { partsViewModel.updateAdminSearchQuery(it) },
+                placeholder = { Text("Search by name or brand...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { partsViewModel.updateAdminSearchQuery("") }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Clear")
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp),
+                singleLine = true,
+                shape = MaterialTheme.shapes.large
+            )
+
+            if (categories.isNotEmpty()) {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    item {
+                        FilterChip(
+                            selected = selectedCategory == null,
+                            onClick = { partsViewModel.selectAdminCategory(null) },
+                            label = { Text("All") }
+                        )
+                    }
+                    items(categories) { category ->
+                        FilterChip(
+                            selected = selectedCategory == category,
+                            onClick = { partsViewModel.selectAdminCategory(category) },
+                            label = { Text(category) }
+                        )
+                    }
+                }
+            }
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
-                onRefresh = { partsViewModel.loadParts() },
+                onRefresh = { partsViewModel.loadAdminParts(isSwipe = true) },
                 modifier = Modifier.fillMaxSize()
             ) {
-                when (val state = partsState) {
+                when (val state = adminPartsState) {
                     is PartsUiState.Loading -> {
                         if (!isRefreshing) {
                             Box(
@@ -93,7 +137,7 @@ fun AdminScreen(
                         }
                     }
                     is PartsUiState.Success -> {
-                        if (state.parts.isEmpty()) {
+                        if (filteredParts.isEmpty()) {
                             Column(
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.Center,
@@ -121,7 +165,7 @@ fun AdminScreen(
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                items(state.parts) { part ->
+                                items(filteredParts) { part ->
                                     AdminPartCard(
                                         part = part,
                                         onEdit = { onNavigateToEdit(part.id) },
@@ -142,7 +186,7 @@ fun AdminScreen(
                                 color = MaterialTheme.colorScheme.error
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            Button(onClick = { partsViewModel.loadParts() }) {
+                            Button(onClick = { partsViewModel.loadAdminParts() }) {
                                 Text("Retry")
                             }
                         }

@@ -12,7 +12,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 
 data class PartFormState(
     val name: String = "",
@@ -57,14 +60,66 @@ class PartsViewModel(
     private val _partFormState = MutableStateFlow(PartFormState())
     val partFormState: StateFlow<PartFormState> = _partFormState.asStateFlow()
 
-    private val _editingPartId = MutableStateFlow<Int?>(null)
-    val editingPartId: StateFlow<Int?> = _editingPartId.asStateFlow()
-
     private val _isDetailLoading = MutableStateFlow(false)
     val isDetailLoading: StateFlow<Boolean> = _isDetailLoading.asStateFlow()
 
     private val _uiEvent = Channel<String>()
     val uiEvent = _uiEvent.receiveAsFlow()
+
+    private val _adminPartsState = MutableStateFlow<PartsUiState>(PartsUiState.Loading)
+    val adminPartsState: StateFlow<PartsUiState> = _adminPartsState.asStateFlow()
+
+    private val _adminSearchQuery = MutableStateFlow("")
+    val adminSearchQuery: StateFlow<String> = _adminSearchQuery.asStateFlow()
+
+    private val _adminSelectedCategory = MutableStateFlow<String?>(null)
+    val adminSelectedCategory: StateFlow<String?> = _adminSelectedCategory.asStateFlow()
+
+    val filteredAdminParts: StateFlow<List<ComputerPart>> = combine(
+        adminPartsState,
+        _adminSearchQuery,
+        _adminSelectedCategory
+    ) { state, query, category ->
+        if (state is PartsUiState.Success) {
+            var parts = state.parts
+            if (query.isNotBlank()) {
+                parts = parts.filter {
+                    it.name.contains(query, ignoreCase = true) ||
+                            it.brand.contains(query, ignoreCase = true)
+                }
+            }
+            category?.let { cat ->
+                parts = parts.filter { it.category == cat }
+            }
+            parts
+        } else {
+            emptyList()
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    fun loadAdminParts(isSwipe: Boolean = false) {
+        viewModelScope.launch {
+            if (isSwipe) {
+                _isRefreshing.value = true
+            } else {
+                _adminPartsState.value = PartsUiState.Loading
+            }
+            try {
+                val parts = getAllPartsUseCase()
+                _adminPartsState.value = PartsUiState.Success(parts)
+            } catch (e: Exception) {
+                _adminPartsState.value = PartsUiState.Error(e.message ?: "Unknown error")
+            } finally {
+                if (isSwipe) {
+                    _isRefreshing.value = false
+                }
+            }
+        }
+    }
 
     fun showNotification(message: String) {
         viewModelScope.launch {
@@ -83,9 +138,13 @@ class PartsViewModel(
         loadParts()
     }
 
-    fun loadParts() {
+    fun loadParts(isSwipe: Boolean = false) {
         viewModelScope.launch {
-            _isRefreshing.value = true
+            if (isSwipe) {
+                _isRefreshing.value = true
+            } else {
+                _partsState.value = PartsUiState.Loading
+            }
             try {
                 val filter = _activeFilter.value
                 val isEmpty = filter.searchQuery.isNullOrBlank() &&
@@ -271,7 +330,6 @@ class PartsViewModel(
                         releaseYear = part.releaseYear.toString(),
                         details = part.details.map { it.specification to it.value }
                     )
-                    _editingPartId.value = partId
                 } else {
                     showNotification("Error: Part with ID $partId not found")
                 }
@@ -301,12 +359,19 @@ class PartsViewModel(
                 loadParts()
                 showNotification("Part \"$name\" updated")
                 clearPartFormState()
-                _editingPartId.value = null
                 onSuccess()
             } catch (e: Exception) {
                 onError()
             }
         }
+    }
+
+    fun updateAdminSearchQuery(query: String) {
+        _adminSearchQuery.value = query
+    }
+
+    fun selectAdminCategory(category: String?) {
+        _adminSelectedCategory.value = category
     }
 }
 
