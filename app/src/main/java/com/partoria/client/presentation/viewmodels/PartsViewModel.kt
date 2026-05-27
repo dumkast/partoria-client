@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 data class PartFormState(
     val name: String = "",
@@ -53,6 +55,15 @@ class PartsViewModel(
 
     private val _partFormState = MutableStateFlow(PartFormState())
     val partFormState: StateFlow<PartFormState> = _partFormState.asStateFlow()
+
+    private val _uiEvent = Channel<String>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
+    fun showNotification(message: String) {
+        viewModelScope.launch {
+            _uiEvent.send(message)
+        }
+    }
 
     fun updatePartFormField(update: (PartFormState) -> PartFormState) {
         _partFormState.value = update(_partFormState.value)
@@ -206,6 +217,7 @@ class PartsViewModel(
                 deletePartUseCase(partId)
                 loadParts()
                 loadFavorites()
+                showNotification("Part deleted")
                 onSuccess()
             } catch (e: Exception) {
             }
@@ -227,6 +239,7 @@ class PartsViewModel(
             try {
                 createPartUseCase(name, category, brand, price, specs, releaseYear, details)
                 loadParts()
+                showNotification("Part \"$name\" created")
                 onSuccess()
             } catch (e: Exception) {
                 onError()

@@ -34,6 +34,17 @@ fun AdminScreen(
 
     val savedFilter = remember { activeFilter }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        partsViewModel.uiEvent.collect { message ->
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
     LaunchedEffect(Unit) {
         partsViewModel.resetFilters()
     }
@@ -45,6 +56,9 @@ fun AdminScreen(
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 80.dp)) },
         topBar = {
             TopAppBar(
                 title = { Text("Admin Panel") },
