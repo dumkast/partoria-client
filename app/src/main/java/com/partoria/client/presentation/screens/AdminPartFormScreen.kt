@@ -25,9 +25,21 @@ fun AdminPartFormScreen(
     onBack: () -> Unit
 ) {
     val formState by partsViewModel.partFormState.collectAsStateWithLifecycle()
+
+    val isNameValid = formState.name.isNotBlank()
+    val isCategoryValid = formState.category.isNotBlank()
+    val isBrandValid = formState.brand.isNotBlank()
+    val isPriceValid = formState.price.toDoubleOrNull()?.let { it > 0 } == true
+    val isSpecsValid = formState.specs.isNotBlank()
+    val isYearValid = formState.releaseYear.toIntOrNull()?.let { it in 2000..2026 } == true
+
+    val isFormValid = isNameValid && isCategoryValid && isBrandValid && isPriceValid && isSpecsValid && isYearValid
+
     var currentSpec by remember { mutableStateOf("") }
     var currentValue by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var showErrors by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -58,7 +70,11 @@ fun AdminPartFormScreen(
                         value = formState.name,
                         onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(name = text) } },
                         label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = showErrors && !isNameValid,
+                        supportingText = {
+                            if (showErrors && !isNameValid) Text("Name is required")
+                        }
                     )
                 }
                 item {
@@ -66,7 +82,11 @@ fun AdminPartFormScreen(
                         value = formState.category,
                         onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(category = text) } },
                         label = { Text("Category") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = showErrors && !isCategoryValid,
+                        supportingText = {
+                            if (showErrors && !isCategoryValid) Text("Category is required")
+                        }
                     )
                 }
                 item {
@@ -74,7 +94,11 @@ fun AdminPartFormScreen(
                         value = formState.brand,
                         onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(brand = text) } },
                         label = { Text("Brand") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = showErrors && !isBrandValid,
+                        supportingText = {
+                            if (showErrors && !isBrandValid) Text("Brand is required")
+                        }
                     )
                 }
                 item {
@@ -83,7 +107,11 @@ fun AdminPartFormScreen(
                         onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(price = text) } },
                         label = { Text("Price") },
                         modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = showErrors && !isPriceValid,
+                        supportingText = {
+                            if (showErrors && !isPriceValid) Text("Price must be greater than 0")
+                        }
                     )
                 }
                 item {
@@ -92,7 +120,11 @@ fun AdminPartFormScreen(
                         onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(specs = text) } },
                         label = { Text("Specifications") },
                         modifier = Modifier.fillMaxWidth(),
-                        minLines = 2
+                        minLines = 2,
+                        isError = showErrors && !isSpecsValid,
+                        supportingText = {
+                            if (showErrors && !isSpecsValid) Text("Specifications are required")
+                        }
                     )
                 }
                 item {
@@ -101,7 +133,11 @@ fun AdminPartFormScreen(
                         onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(releaseYear = text) } },
                         label = { Text("Release Year") },
                         modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = showErrors && !isYearValid,
+                        supportingText = {
+                            if (showErrors && !isYearValid) Text("Year must be between 2000 and 2026")
+                        }
                     )
                 }
 
@@ -202,36 +238,50 @@ fun AdminPartFormScreen(
                 }
             }
 
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
             Button(
                 onClick = {
-                    isLoading = true
-                    partsViewModel.createPart(
-                        name = formState.name,
-                        category = formState.category,
-                        brand = formState.brand,
-                        price = formState.price.toDoubleOrNull() ?: 0.0,
-                        specs = formState.specs,
-                        releaseYear = formState.releaseYear.toIntOrNull() ?: 2024,
-                        details = formState.details.map { (spec, value) ->
-                            com.partoria.client.data.model.PartDetailRequest(
-                                specification = spec,
-                                value = value
-                            )
-                        },
-                        onSuccess = {
-                            isLoading = false
-                            partsViewModel.clearPartFormState()
-                            onBack()
-                        },
-                        onError = {
-                            isLoading = false
-                        }
-                    )
+                    showErrors = true
+                    if (isFormValid) {
+                        isLoading = true
+                        partsViewModel.createPart(
+                            name = formState.name,
+                            category = formState.category,
+                            brand = formState.brand,
+                            price = formState.price.toDoubleOrNull() ?: 0.0,
+                            specs = formState.specs,
+                            releaseYear = formState.releaseYear.toIntOrNull() ?: 2024,
+                            details = formState.details.map { (spec, value) ->
+                                com.partoria.client.data.model.PartDetailRequest(
+                                    specification = spec,
+                                    value = value
+                                )
+                            },
+                            onSuccess = {
+                                isLoading = false
+                                errorMessage = null
+                                partsViewModel.clearPartFormState()
+                                onBack()
+                            },
+                            onError = {
+                                isLoading = false
+                                errorMessage = "Failed to create part. Check your data."
+                            }
+                        )
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
-                enabled = formState.name.isNotBlank() && formState.category.isNotBlank() && formState.brand.isNotBlank() && formState.price.isNotBlank() && formState.specs.isNotBlank() && formState.releaseYear.isNotBlank() && !isLoading
+                enabled = !isLoading
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
