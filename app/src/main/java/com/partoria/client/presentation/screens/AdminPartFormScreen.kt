@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.partoria.client.presentation.viewmodels.FiltersMetaUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,6 +26,10 @@ fun AdminPartFormScreen(
     onBack: () -> Unit
 ) {
     val formState by partsViewModel.partFormState.collectAsStateWithLifecycle()
+
+    val filtersMetaState by partsViewModel.filtersMetaState.collectAsStateWithLifecycle()
+    val categories = (filtersMetaState as? FiltersMetaUiState.Success)?.meta?.categories ?: emptyList()
+    val brands = (filtersMetaState as? FiltersMetaUiState.Success)?.meta?.brands ?: emptyList()
 
     val isNameValid = formState.name.isNotBlank()
     val isCategoryValid = formState.category.isNotBlank()
@@ -40,6 +45,13 @@ fun AdminPartFormScreen(
     var isLoading by remember { mutableStateOf(false) }
     var showErrors by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    var categoryExpanded by remember { mutableStateOf(false) }
+    var brandExpanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        partsViewModel.loadFiltersMeta()
+    }
 
     Scaffold(
         topBar = {
@@ -78,28 +90,74 @@ fun AdminPartFormScreen(
                     )
                 }
                 item {
-                    OutlinedTextField(
-                        value = formState.category,
-                        onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(category = text) } },
-                        label = { Text("Category") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = showErrors && !isCategoryValid,
-                        supportingText = {
-                            if (showErrors && !isCategoryValid) Text("Category is required")
+                    ExposedDropdownMenuBox(
+                        expanded = categoryExpanded,
+                        onExpandedChange = { categoryExpanded = it }
+                    ) {
+                        OutlinedTextField(
+                            value = formState.category,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Category") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                            isError = showErrors && !isCategoryValid,
+                            supportingText = {
+                                if (showErrors && !isCategoryValid) Text("Category is required")
+                            }
+                        )
+                        ExposedDropdownMenu(
+                            expanded = categoryExpanded,
+                            onDismissRequest = { categoryExpanded = false }
+                        ) {
+                            categories.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category) },
+                                    onClick = {
+                                        partsViewModel.updatePartFormField { state -> state.copy(category = category) }
+                                        categoryExpanded = false
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
                 }
                 item {
-                    OutlinedTextField(
-                        value = formState.brand,
-                        onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(brand = text) } },
-                        label = { Text("Brand") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = showErrors && !isBrandValid,
-                        supportingText = {
-                            if (showErrors && !isBrandValid) Text("Brand is required")
+                    ExposedDropdownMenuBox(
+                        expanded = brandExpanded,
+                        onExpandedChange = { brandExpanded = it }
+                    ) {
+                        OutlinedTextField(
+                            value = formState.brand,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Brand") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) },
+                            isError = showErrors && !isBrandValid,
+                            supportingText = {
+                                if (showErrors && !isBrandValid) Text("Brand is required")
+                            }
+                        )
+                        ExposedDropdownMenu(
+                            expanded = brandExpanded,
+                            onDismissRequest = { brandExpanded = false }
+                        ) {
+                            brands.forEach { brand ->
+                                DropdownMenuItem(
+                                    text = { Text(brand) },
+                                    onClick = {
+                                        partsViewModel.updatePartFormField { state -> state.copy(brand = brand) }
+                                        brandExpanded = false
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
                 }
                 item {
                     OutlinedTextField(
