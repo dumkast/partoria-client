@@ -5,6 +5,7 @@ import com.partoria.client.data.model.CreatePartRequest
 import com.partoria.client.data.model.FilterRequest
 import com.partoria.client.data.model.PartDetailRequest
 import com.partoria.client.data.model.PartResponse
+import com.partoria.client.data.model.UpdatePartRequest
 import com.partoria.client.domain.model.ComputerPart
 import com.partoria.client.domain.model.Filter
 import com.partoria.client.domain.model.FilterMeta
@@ -149,5 +150,29 @@ class PartRepositoryImpl(
                 )
             }
         )
+    }
+
+    override suspend fun updatePart(
+        id: Int,
+        name: String,
+        category: String,
+        brand: String,
+        price: Double,
+        specs: String,
+        releaseYear: Int,
+        details: List<PartDetailRequest>
+    ) {
+        val token = getToken()
+        val request = UpdatePartRequest(
+            id = id,
+            name = name,
+            category = category,
+            brand = brand,
+            price = price,
+            specs = specs,
+            releaseYear = releaseYear,
+            details = details
+        )
+        apiService.updatePart(token, request)
     }
 }

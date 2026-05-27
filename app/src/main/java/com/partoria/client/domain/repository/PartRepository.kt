@@ -25,4 +25,14 @@ interface PartRepository {
         releaseYear: Int,
         details: List<PartDetailRequest>
     ): Int
+    suspend fun updatePart(
+        id: Int,
+        name: String,
+        category: String,
+        brand: String,
+        price: Double,
+        specs: String,
+        releaseYear: Int,
+        details: List<PartDetailRequest>
+    )
 }

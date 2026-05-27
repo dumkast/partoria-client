@@ -7,6 +7,7 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.HttpHeaders
@@ -140,5 +141,14 @@ class ApiServiceImpl(
         val message = response["message"] ?: throw Exception("No message in response")
         val id = message.substringAfterLast(" ").toIntOrNull() ?: throw Exception("Failed to parse part id")
         return id
+    }
+
+    override suspend fun updatePart(token: String, part: UpdatePartRequest) {
+        client.put {
+            url("$baseUrl/admin/parts")
+            contentType(io.ktor.http.ContentType.Application.Json)
+            headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            setBody(part)
+        }
     }
 }

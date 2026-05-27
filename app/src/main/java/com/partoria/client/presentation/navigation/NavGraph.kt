@@ -139,13 +139,29 @@ fun NavGraph(
             composable(Screen.Admin.route) {
                 AdminScreen(
                     partsViewModel = partsViewModel,
-                    onNavigateToCreate = { navController.navigate(Screen.AdminPartForm.route) }
+                    onNavigateToCreate = { navController.navigate(Screen.AdminPartForm.route) },
+                    onNavigateToEdit = { partId ->
+                        navController.navigate(Screen.AdminPartEdit.createRoute(partId))
+                    }
                 )
             }
 
             composable(Screen.AdminPartForm.route) {
                 AdminPartFormScreen(
                     partsViewModel = partsViewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.AdminPartEdit.route,
+                arguments = listOf(navArgument("partId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val partId = backStackEntry.arguments?.getInt("partId") ?: return@composable
+                AdminPartFormScreen(
+                    partsViewModel = partsViewModel,
+                    partId = partId,
+                    isEditMode = true,
                     onBack = { navController.popBackStack() }
                 )
             }

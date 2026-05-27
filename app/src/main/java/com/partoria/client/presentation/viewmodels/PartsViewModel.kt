@@ -35,7 +35,8 @@ class PartsViewModel(
     private val getFavoritesUseCase: GetFavoritesUseCase,
     private val searchPartsUseCase: SearchPartsUseCase,
     private val deletePartUseCase: DeletePartUseCase,
-    private val createPartUseCase: CreatePartUseCase
+    private val createPartUseCase: CreatePartUseCase,
+    private val updatePartUseCase: UpdatePartUseCase
 ) : ViewModel() {
 
     private val _partsState = MutableStateFlow<PartsUiState>(PartsUiState.Loading)
@@ -55,6 +56,12 @@ class PartsViewModel(
 
     private val _partFormState = MutableStateFlow(PartFormState())
     val partFormState: StateFlow<PartFormState> = _partFormState.asStateFlow()
+
+    private val _editingPartId = MutableStateFlow<Int?>(null)
+    val editingPartId: StateFlow<Int?> = _editingPartId.asStateFlow()
+
+    private val _isDetailLoading = MutableStateFlow(false)
+    val isDetailLoading: StateFlow<Boolean> = _isDetailLoading.asStateFlow()
 
     private val _uiEvent = Channel<String>()
     val uiEvent = _uiEvent.receiveAsFlow()
@@ -240,6 +247,61 @@ class PartsViewModel(
                 createPartUseCase(name, category, brand, price, specs, releaseYear, details)
                 loadParts()
                 showNotification("Part \"$name\" created")
+                onSuccess()
+            } catch (e: Exception) {
+                onError()
+            }
+        }
+    }
+
+    fun loadPartForEditing(partId: Int) {
+        viewModelScope.launch {
+            _isDetailLoading.value = true
+            clearPartFormState()
+            try {
+                val part = getPartWithDetailsUseCase(partId)
+
+                if (part != null) {
+                    _partFormState.value = PartFormState(
+                        name = part.name,
+                        category = part.category,
+                        brand = part.brand,
+                        price = part.price.toString(),
+                        specs = part.specs,
+                        releaseYear = part.releaseYear.toString(),
+                        details = part.details.map { it.specification to it.value }
+                    )
+                    _editingPartId.value = partId
+                } else {
+                    showNotification("Error: Part with ID $partId not found")
+                }
+            } catch (e: Exception) {
+                showNotification("Failed to load part details")
+            } finally {
+                _isDetailLoading.value = false
+            }
+        }
+    }
+
+    fun updatePart(
+        id: Int,
+        name: String,
+        category: String,
+        brand: String,
+        price: Double,
+        specs: String,
+        releaseYear: Int,
+        details: List<PartDetailRequest>,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                updatePartUseCase(id, name, category, brand, price, specs, releaseYear, details)
+                loadParts()
+                showNotification("Part \"$name\" updated")
+                clearPartFormState()
+                _editingPartId.value = null
                 onSuccess()
             } catch (e: Exception) {
                 onError()

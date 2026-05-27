@@ -16,4 +16,5 @@ interface ApiService {
     suspend fun searchParts(token: String, query: String): PartsResponse
     suspend fun deletePart(token: String, partId: Int)
     suspend fun createPart(token: String, part: CreatePartRequest): Int
+    suspend fun updatePart(token: String, part: UpdatePartRequest)
 }

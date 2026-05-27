@@ -25,7 +25,8 @@ import com.partoria.client.presentation.viewmodels.PartsViewModel
 @Composable
 fun AdminScreen(
     partsViewModel: PartsViewModel,
-    onNavigateToCreate: () -> Unit
+    onNavigateToCreate: () -> Unit,
+    onNavigateToEdit: (Int) -> Unit
 ) {
     val activeFilter by partsViewModel.activeFilter.collectAsStateWithLifecycle()
     val partsState by partsViewModel.partsState.collectAsStateWithLifecycle()
@@ -105,7 +106,7 @@ fun AdminScreen(
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Button(
-                                    onClick = { /* TODO: создать деталь */ }
+                                    onClick = onNavigateToCreate
                                 ) {
                                     Text("Create first part")
                                 }
@@ -123,7 +124,7 @@ fun AdminScreen(
                                 items(state.parts) { part ->
                                     AdminPartCard(
                                         part = part,
-                                        onEdit = { /* TODO: редактировать */ },
+                                        onEdit = { onNavigateToEdit(part.id) },
                                         onDelete = { showDeleteDialog = part }
                                     )
                                 }

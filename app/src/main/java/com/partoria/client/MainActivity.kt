@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
         val searchPartsUseCase = SearchPartsUseCase(partRepository)
         val deletePartUseCase = DeletePartUseCase(partRepository)
         val createPartUseCase = CreatePartUseCase(partRepository)
+        val updatePartUseCase = UpdatePartUseCase(partRepository)
 
         partsViewModel = PartsViewModel(
             getAllPartsUseCase,
@@ -74,7 +75,8 @@ class MainActivity : ComponentActivity() {
             getFavoritesUseCase,
             searchPartsUseCase,
             deletePartUseCase,
-            createPartUseCase
+            createPartUseCase,
+            updatePartUseCase
         )
 
         setContent {
