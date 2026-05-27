@@ -3,21 +3,19 @@ package com.partoria.client.presentation.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.partoria.client.domain.model.ComputerPart
 import com.partoria.client.presentation.viewmodels.PartsViewModel
+import com.partoria.client.utils.CategoryIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,14 +106,15 @@ fun PartDetailScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(200.dp)
+                                    .height(160.dp)
                                     .background(MaterialTheme.colorScheme.surfaceVariant),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Settings,
+                                    imageVector = CategoryIcon.getIcon(part?.category ?: ""),
                                     contentDescription = null,
-                                    modifier = Modifier.size(64.dp)
+                                    modifier = Modifier.size(120.dp),
+                                    tint = CategoryIcon.getColor(part?.category ?: "")
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))

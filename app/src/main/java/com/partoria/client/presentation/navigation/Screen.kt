@@ -1,10 +1,10 @@
 package com.partoria.client.presentation.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val icon: ImageVector? = null, val label: String? = null) {
@@ -14,7 +14,7 @@ sealed class Screen(val route: String, val icon: ImageVector? = null, val label:
     object PartDetail : Screen("part_detail/{partId}") {
         fun createRoute(partId: Int): String = "part_detail/$partId"
     }
-    object Favorites : Screen("favorites", Icons.Default.FavoriteBorder, "Favorites")
+    object Favorites : Screen("favorites", Icons.Default.Favorite, "Favorites")
     object Profile : Screen("profile", Icons.Default.Person, "Profile")
     object Filter : Screen("filter")
     object Admin : Screen("admin", Icons.Default.AdminPanelSettings, "Admin")
