@@ -1,12 +1,10 @@
 package com.partoria.client.presentation.navigation
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,13 +14,17 @@ import androidx.navigation.navArgument
 import com.partoria.client.presentation.screens.*
 import com.partoria.client.presentation.viewmodels.AuthViewModel
 import com.partoria.client.presentation.viewmodels.PartsViewModel
-import androidx.compose.runtime.remember
+import com.partoria.client.presentation.screens.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph(
     authViewModel: AuthViewModel,
-    partsViewModel: PartsViewModel
+    partsViewModel: PartsViewModel,
+    currentTheme: AppTheme,
+    onThemeChange: (AppTheme) -> Unit,
+    savedColorIndex: Int,
+    onColorIndexChange: (Int) -> Unit
 ) {
     val navController = rememberNavController()
     val isLoggedIn by authViewModel.isLoggedIn().collectAsState(initial = false)
@@ -77,9 +79,7 @@ fun NavGraph(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route,
-            modifier = Modifier
-        ) {
+            startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route,) {
             composable(Screen.Login.route) {
                 LoginScreen(
                     authViewModel = authViewModel,
@@ -128,6 +128,10 @@ fun NavGraph(
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     authViewModel = authViewModel,
+                    currentTheme = currentTheme,
+                    onThemeChange = onThemeChange,
+                    savedColorIndex = savedColorIndex,
+                    onColorIndexChange = onColorIndexChange,
                     onLogout = {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }

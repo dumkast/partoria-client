@@ -41,15 +41,6 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun getCurrentUser(): User? {
-        val username = tokenDataStore.getUsername().firstOrNull()
-        return if (username != null) {
-            User(0, username, "user")
-        } else {
-            null
-        }
-    }
-
     override suspend fun saveAuthData(token: String, username: String, role: String) {
         tokenDataStore.saveToken(token, username, role)
     }

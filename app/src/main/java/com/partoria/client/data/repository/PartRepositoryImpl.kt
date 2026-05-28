@@ -29,15 +29,6 @@ class PartRepositoryImpl(
         return response.map { it.toDomain() }
     }
 
-    override suspend fun getPartById(id: Int): ComputerPart? {
-        val token = getToken()
-        return try {
-            apiService.getPartById(token, id).toDomain()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     override suspend fun getPartWithDetails(id: Int): ComputerPart? {
         val token = getToken()
         return try {
@@ -97,13 +88,6 @@ class PartRepositoryImpl(
         val token = getToken()
         val response = apiService.getFavorites(token)
         return response.map { it.toDomain() }
-    }
-
-    override suspend fun searchParts(query: String): List<ComputerPart> {
-        println("SEARCH REQUEST: $query")
-        val token = getToken()
-        val response = apiService.searchParts(token, query)
-        return response.items.map { it.toDomain() }
     }
 
     override suspend fun deletePart(partId: Int) {

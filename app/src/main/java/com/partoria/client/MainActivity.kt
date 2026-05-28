@@ -18,28 +18,39 @@ import com.partoria.client.presentation.navigation.NavGraph
 import com.partoria.client.presentation.viewmodels.AuthViewModel
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 import com.partoria.client.ui.theme.PartoriaClientTheme
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
+import com.partoria.client.data.datastore.SettingsDataStore
+import com.partoria.client.presentation.screens.AppTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var authViewModel: AuthViewModel
     private lateinit var partsViewModel: PartsViewModel
+    private lateinit var settingsDataStore: SettingsDataStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val tokenDataStore = TokenDataStore(this)
+        settingsDataStore = SettingsDataStore(this)
         val apiService = ApiServiceImpl(HttpClientProvider.createClient())
 
         val authRepository = AuthRepositoryImpl(apiService, tokenDataStore)
-        val partRepository = PartRepositoryImpl(apiService) { authRepository.getToken() }
 
         val loginUseCase = LoginUseCase(authRepository)
         val registerUseCase = RegisterUseCase(authRepository)
+        val getTokenUseCase = GetTokenUseCase(authRepository)
         val saveAuthDataUseCase = SaveAuthDataUseCase(authRepository)
         val clearAuthDataUseCase = ClearAuthDataUseCase(authRepository)
         val isLoggedInUseCase = IsLoggedInUseCase(authRepository)
         val getUserRoleUseCase = GetUserRoleUseCase(authRepository)
         val getUsernameUseCase = GetUsernameUseCase(authRepository)
+
+        val partRepository = PartRepositoryImpl(apiService) { getTokenUseCase() }
 
         authViewModel = AuthViewModel(
             loginUseCase,
@@ -52,42 +63,57 @@ class MainActivity : ComponentActivity() {
         )
 
         val getAllPartsUseCase = GetAllPartsUseCase(partRepository)
-        val getPartByIdUseCase = GetPartByIdUseCase(partRepository)
         val getPartWithDetailsUseCase = GetPartWithDetailsUseCase(partRepository)
         val getFilteredPartsUseCase = GetFilteredPartsUseCase(partRepository)
         val getFiltersMetaUseCase = GetFiltersMetaUseCase(partRepository)
         val addToFavoritesUseCase = AddToFavoritesUseCase(partRepository)
         val removeFromFavoritesUseCase = RemoveFromFavoritesUseCase(partRepository)
         val getFavoritesUseCase = GetFavoritesUseCase(partRepository)
-        val searchPartsUseCase = SearchPartsUseCase(partRepository)
         val deletePartUseCase = DeletePartUseCase(partRepository)
         val createPartUseCase = CreatePartUseCase(partRepository)
         val updatePartUseCase = UpdatePartUseCase(partRepository)
 
         partsViewModel = PartsViewModel(
             getAllPartsUseCase,
-            getPartByIdUseCase,
             getPartWithDetailsUseCase,
             getFilteredPartsUseCase,
             getFiltersMetaUseCase,
             addToFavoritesUseCase,
             removeFromFavoritesUseCase,
             getFavoritesUseCase,
-            searchPartsUseCase,
             deletePartUseCase,
             createPartUseCase,
             updatePartUseCase
         )
 
         setContent {
-            PartoriaClientTheme {
+            val currentTheme by settingsDataStore.appThemeFlow.collectAsState(initial = AppTheme.SYSTEM)
+            val savedColorIndex by settingsDataStore.avatarColorIndexFlow.collectAsState(initial = -1)
+            val useDarkTheme = when (currentTheme) {
+                AppTheme.LIGHT -> false
+                AppTheme.DARK -> true
+                AppTheme.SYSTEM -> isSystemInDarkTheme()
+            }
+            PartoriaClientTheme(darkTheme = useDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     NavGraph(
                         authViewModel = authViewModel,
-                        partsViewModel = partsViewModel
+                        partsViewModel = partsViewModel,
+                        currentTheme = currentTheme,
+                        onThemeChange = { selectedTheme ->
+                            lifecycleScope.launch {
+                                settingsDataStore.saveAppTheme(selectedTheme)
+                            }
+                        },
+                        savedColorIndex = savedColorIndex,
+                        onColorIndexChange = { newIndex ->
+                            lifecycleScope.launch {
+                                settingsDataStore.saveAvatarColorIndex(newIndex)
+                            }
+                        }
                     )
                 }
             }

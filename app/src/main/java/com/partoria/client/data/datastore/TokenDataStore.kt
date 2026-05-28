@@ -50,13 +50,4 @@ class TokenDataStore(private val context: Context) {
             preferences[USERNAME_KEY]
         }
     }
-
-    suspend fun isLoggedIn(): Boolean {
-        val preferences = context.dataStore.data
-        var token: String? = null
-        preferences.collect { prefs ->
-            token = prefs[TOKEN_KEY]
-        }
-        return !token.isNullOrEmpty()
-    }
 }

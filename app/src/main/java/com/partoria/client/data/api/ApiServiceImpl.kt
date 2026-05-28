@@ -45,15 +45,6 @@ class ApiServiceImpl(
         }.body()
     }
 
-    override suspend fun getPartById(token: String, id: Int): PartResponse {
-        return client.get {
-            url("$baseUrl/parts/$id")
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
-            }
-        }.body()
-    }
-
     override suspend fun getPartWithDetails(token: String, id: Int): PartResponse {
         return client.get {
             url("$baseUrl/parts/$id/details")
@@ -109,16 +100,6 @@ class ApiServiceImpl(
                 append(HttpHeaders.Authorization, "Bearer $token")
             }
         }
-    }
-
-    override suspend fun searchParts(token: String, query: String): PartsResponse {
-        println("API CALL: searchParts to $baseUrl/parts/search?q=$query")
-        return client.get {
-            url("$baseUrl/parts/search?q=$query")
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
-            }
-        }.body()
     }
 
     override suspend fun deletePart(token: String, partId: Int) {

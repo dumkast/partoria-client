@@ -7,15 +7,12 @@ import com.partoria.client.domain.model.ComputerPart
 import com.partoria.client.domain.model.Filter
 import com.partoria.client.domain.model.FilterMeta
 import com.partoria.client.domain.usecase.part.*
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -32,14 +29,12 @@ data class PartFormState(
 
 class PartsViewModel(
     private val getAllPartsUseCase: GetAllPartsUseCase,
-    private val getPartByIdUseCase: GetPartByIdUseCase,
     private val getPartWithDetailsUseCase: GetPartWithDetailsUseCase,
     private val getFilteredPartsUseCase: GetFilteredPartsUseCase,
     private val getFiltersMetaUseCase: GetFiltersMetaUseCase,
     private val addToFavoritesUseCase: AddToFavoritesUseCase,
     private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
     private val getFavoritesUseCase: GetFavoritesUseCase,
-    private val searchPartsUseCase: SearchPartsUseCase,
     private val deletePartUseCase: DeletePartUseCase,
     private val createPartUseCase: CreatePartUseCase,
     private val updatePartUseCase: UpdatePartUseCase
@@ -181,10 +176,6 @@ class PartsViewModel(
             searchQuery = query.takeIf { it.isNotBlank() }
         )
         loadParts()
-    }
-
-    fun searchParts(query: String) {
-        updateSearchQuery(query)
     }
 
     fun resetFilters() {
