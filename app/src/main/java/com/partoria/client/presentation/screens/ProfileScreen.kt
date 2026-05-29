@@ -3,16 +3,10 @@ package com.partoria.client.presentation.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,35 +19,24 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.partoria.client.presentation.viewmodels.AuthViewModel
 
-enum class AppTheme(val title: String) {
-    SYSTEM("System Default"),
-    LIGHT("Light Theme"),
-    DARK("Dark Theme")
-}
-
 data class GradientColors(val name: String, val start: Color, val end: Color)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
-    currentTheme: AppTheme,
-    onThemeChange: (AppTheme) -> Unit,
     savedColorIndex: Int,
     onColorIndexChange: (Int) -> Unit,
     onLogout: () -> Unit
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showColorDropdown by remember { mutableStateOf(false) }
-    var showThemeDropdown by remember { mutableStateOf(false) }
 
     val username by authViewModel.getUsername().collectAsStateWithLifecycle(initialValue = "")
     val role by authViewModel.getUserRole().collectAsStateWithLifecycle(initialValue = "")
 
     val displayUsername = username?.takeIf { it.isNotBlank() } ?: "User"
-    val isAdmin = remember(role) {
-        !role.isNullOrBlank() && role.equals("admin", ignoreCase = true)
-    }
+
     val vibrantGradients = remember {
         listOf(
             GradientColors("Neon Purple", Color(0xFF7F00FF), Color(0xFFE100FF)),
@@ -83,108 +66,175 @@ fun ProfileScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFFF5F5F5),
         topBar = {
-            TopAppBar(title = { Text("Profile") })
+            TopAppBar(
+                title = {
+                    Text(
+                        "Profile",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1A1A2E)
+                )
+            )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(selectedGradient.start, selectedGradient.end)
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = avatarLetter,
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    ListItem(
-                        headlineContent = { Text(displayUsername) },
-                        supportingContent = { Text("Username") },
-                        leadingContent = { Icon(Icons.Default.Person, contentDescription = null) },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color(0xFF1A1A2E), Color(0xFF16213E))
                     )
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(selectedGradient.start, selectedGradient.end)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = avatarLetter,
+                        color = Color.White,
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
-                    if (!role.isNullOrBlank()) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                Spacer(modifier = Modifier.height(16.dp))
 
+                // User info card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.1f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = null,
+                                tint = Color(0xFF6C63FF),
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = displayUsername,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Username",
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
+
+                        if (!role.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Divider(color = Color.White.copy(alpha = 0.1f))
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Settings,
+                                    contentDescription = null,
+                                    tint = Color(0xFF6C63FF),
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Column {
+                                    Text(
+                                        text = role?.replaceFirstChar { it.uppercase() } ?: "",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Normal,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "Access Level / Role",
+                                        color = Color.White.copy(alpha = 0.5f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Settings card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.1f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Avatar Color
                         ListItem(
                             headlineContent = {
                                 Text(
-                                    text = role?.replaceFirstChar { it.uppercase() } ?: "",
-                                    color = if (isAdmin) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = if (isAdmin) FontWeight.SemiBold else FontWeight.Normal
+                                    "Avatar Color",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium
                                 )
                             },
-                            supportingContent = { Text("Access Level / Role") },
+                            supportingContent = {
+                                Text(
+                                    "Current: ${selectedGradient.name}",
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                            },
                             leadingContent = {
                                 Icon(
-                                    imageVector = Icons.Default.Settings,
+                                    Icons.Default.Palette,
                                     contentDescription = null,
-                                    tint = if (isAdmin) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = Color(0xFF6C63FF),
+                                    modifier = Modifier.size(32.dp)
                                 )
                             },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Box {
-                        ListItem(
-                            headlineContent = { Text("Avatar Color") },
-                            supportingContent = { Text("Current: ${selectedGradient.name}") },
-                            leadingContent = { Icon(Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                             trailingContent = {
                                 Box(
                                     modifier = Modifier
-                                        .size(24.dp)
+                                        .size(32.dp)
                                         .clip(CircleShape)
-                                        .background(Brush.linearGradient(listOf(selectedGradient.start, selectedGradient.end)))
+                                        .background(
+                                            brush = Brush.linearGradient(
+                                                listOf(selectedGradient.start, selectedGradient.end)
+                                            )
+                                        )
                                 )
                             },
                             modifier = Modifier.clickable { showColorDropdown = true },
@@ -194,11 +244,12 @@ fun ProfileScreen(
                         DropdownMenu(
                             expanded = showColorDropdown,
                             onDismissRequest = { showColorDropdown = false },
-                            modifier = Modifier.fillMaxWidth(0.9f)
+                            modifier = Modifier.fillMaxWidth(0.9f),
+                            containerColor = Color(0xFF1A1A2E)
                         ) {
                             vibrantGradients.forEachIndexed { index, gradient ->
                                 DropdownMenuItem(
-                                    text = { Text(gradient.name) },
+                                    text = { Text(gradient.name, color = Color.White) },
                                     onClick = {
                                         onColorIndexChange(index)
                                         showColorDropdown = false
@@ -206,50 +257,22 @@ fun ProfileScreen(
                                     leadingIcon = {
                                         Box(
                                             modifier = Modifier
-                                                .size(20.dp)
+                                                .size(24.dp)
                                                 .clip(CircleShape)
-                                                .background(Brush.linearGradient(listOf(gradient.start, gradient.end)))
+                                                .background(
+                                                    brush = Brush.linearGradient(
+                                                        listOf(gradient.start, gradient.end)
+                                                    )
+                                                )
                                         )
                                     },
                                     trailingIcon = {
                                         if (index == activeColorIndex) {
-                                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    )
-
-                    Box {
-                        ListItem(
-                            headlineContent = { Text("App Theme") },
-                            supportingContent = { Text("Current: ${currentTheme.title}") },
-                            leadingContent = { Icon(Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                            modifier = Modifier.clickable { showThemeDropdown = true },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                        )
-
-                        DropdownMenu(
-                            expanded = showThemeDropdown,
-                            onDismissRequest = { showThemeDropdown = false },
-                            modifier = Modifier.fillMaxWidth(0.9f)
-                        ) {
-                            AppTheme.entries.forEach { theme ->
-                                DropdownMenuItem(
-                                    text = { Text(theme.title) },
-                                    onClick = {
-                                        onThemeChange(theme)
-                                        showThemeDropdown = false
-                                    },
-                                    trailingIcon = {
-                                        if (theme == currentTheme) {
-                                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = Color(0xFF6C63FF)
+                                            )
                                         }
                                     }
                                 )
@@ -257,23 +280,32 @@ fun ProfileScreen(
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
-            Button(
-                onClick = { showLogoutDialog = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                )
-            ) {
-                Icon(Icons.Default.ExitToApp, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Logout")
+                // Logout button
+                Button(
+                    onClick = { showLogoutDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF6B6B).copy(alpha = 0.15f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ExitToApp,
+                        contentDescription = null,
+                        tint = Color(0xFFFF6B6B)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Logout",
+                        color = Color(0xFFFF6B6B),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
         }
     }
@@ -281,8 +313,20 @@ fun ProfileScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Logout") },
-            text = { Text("Are you sure you want to logout from your profile?") },
+            containerColor = Color(0xFF1A1A2E),
+            title = {
+                Text(
+                    "Logout",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            },
+            text = {
+                Text(
+                    "Are you sure you want to logout?",
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -291,12 +335,12 @@ fun ProfileScreen(
                         onLogout()
                     }
                 ) {
-                    Text("Logout", color = MaterialTheme.colorScheme.error)
+                    Text("Yes", color = Color(0xFFFF6B6B))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text("No", color = Color.White.copy(alpha = 0.7f))
                 }
             }
         )

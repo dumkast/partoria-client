@@ -18,12 +18,10 @@ import com.partoria.client.presentation.navigation.NavGraph
 import com.partoria.client.presentation.viewmodels.AuthViewModel
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 import com.partoria.client.ui.theme.PartoriaClientTheme
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.partoria.client.data.datastore.SettingsDataStore
-import com.partoria.client.presentation.screens.AppTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -87,13 +85,8 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            val currentTheme by settingsDataStore.appThemeFlow.collectAsState(initial = AppTheme.SYSTEM)
             val savedColorIndex by settingsDataStore.avatarColorIndexFlow.collectAsState(initial = -1)
-            val useDarkTheme = when (currentTheme) {
-                AppTheme.LIGHT -> false
-                AppTheme.DARK -> true
-                AppTheme.SYSTEM -> isSystemInDarkTheme()
-            }
+            val useDarkTheme = true
             PartoriaClientTheme(darkTheme = useDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -102,12 +95,6 @@ class MainActivity : ComponentActivity() {
                     NavGraph(
                         authViewModel = authViewModel,
                         partsViewModel = partsViewModel,
-                        currentTheme = currentTheme,
-                        onThemeChange = { selectedTheme ->
-                            lifecycleScope.launch {
-                                settingsDataStore.saveAppTheme(selectedTheme)
-                            }
-                        },
                         savedColorIndex = savedColorIndex,
                         onColorIndexChange = { newIndex ->
                             lifecycleScope.launch {

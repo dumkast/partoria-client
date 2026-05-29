@@ -14,15 +14,12 @@ import androidx.navigation.navArgument
 import com.partoria.client.presentation.screens.*
 import com.partoria.client.presentation.viewmodels.AuthViewModel
 import com.partoria.client.presentation.viewmodels.PartsViewModel
-import com.partoria.client.presentation.screens.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph(
     authViewModel: AuthViewModel,
     partsViewModel: PartsViewModel,
-    currentTheme: AppTheme,
-    onThemeChange: (AppTheme) -> Unit,
     savedColorIndex: Int,
     onColorIndexChange: (Int) -> Unit
 ) {
@@ -48,7 +45,9 @@ fun NavGraph(
 
     val shouldShowBottomBar = isLoggedIn &&
             currentRoute != Screen.PartDetail.route &&
-            currentRoute != Screen.Filter.route
+            currentRoute != Screen.Filter.route &&
+            currentRoute != Screen.AdminPartEdit.route &&
+            currentRoute != Screen.AdminPartForm.route
 
     Scaffold(
         bottomBar = {
@@ -128,8 +127,6 @@ fun NavGraph(
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     authViewModel = authViewModel,
-                    currentTheme = currentTheme,
-                    onThemeChange = onThemeChange,
                     savedColorIndex = savedColorIndex,
                     onColorIndexChange = onColorIndexChange,
                     onLogout = {
