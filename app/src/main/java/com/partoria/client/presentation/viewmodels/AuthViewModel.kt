@@ -23,6 +23,13 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
+    private val _showRegistrationSuccess = MutableStateFlow(false)
+    val showRegistrationSuccess: StateFlow<Boolean> = _showRegistrationSuccess.asStateFlow()
+
+    fun setRegistrationSuccess(show: Boolean) {
+        _showRegistrationSuccess.value = show
+    }
+
     fun login(username: String, password: String) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading

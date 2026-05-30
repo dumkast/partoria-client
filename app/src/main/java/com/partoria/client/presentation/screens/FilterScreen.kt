@@ -179,7 +179,7 @@ fun FilterScreen(
                             onClick = { partsViewModel.loadFiltersMeta() },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C63FF))
                         ) {
-                            Text("Retry")
+                            Text("Retry", color = Color.White)
                         }
                     }
                 }

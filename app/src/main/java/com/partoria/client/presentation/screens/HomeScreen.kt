@@ -199,7 +199,7 @@ fun HomeScreen(
                                                     ),
                                                     shape = RoundedCornerShape(12.dp)
                                                 ) {
-                                                    Text("Clear all filters")
+                                                    Text("Clear all filters", color = Color.White)
                                                 }
                                             }
                                         }
@@ -283,7 +283,7 @@ fun HomeScreen(
                                             ),
                                             shape = RoundedCornerShape(12.dp)
                                         ) {
-                                            Text("Try Again")
+                                            Text("Try Again", color = Color.White)
                                         }
                                     }
                                 }

@@ -45,6 +45,7 @@ fun RegisterScreen(
     LaunchedEffect(currentState) {
         if (currentState is AuthUiState.RegisterSuccess) {
             authViewModel.resetState()
+            authViewModel.setRegistrationSuccess(true)
             onRegisterSuccess()
         }
     }

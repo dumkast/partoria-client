@@ -155,7 +155,7 @@ fun FavoritesScreen(
                                 Icons.Default.Favorite,
                                 contentDescription = null,
                                 modifier = Modifier.size(64.dp),
-                                tint = Color(0xFFFF6B6B).copy(alpha = 0.5f)
+                                tint = Color(0xFFFF6B6B)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
@@ -171,7 +171,7 @@ fun FavoritesScreen(
                                 ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("Try Again")
+                                Text("Try Again", color = Color.White)
                             }
                         }
                     }
