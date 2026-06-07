@@ -12,15 +12,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.partoria.client.R
 import com.partoria.client.presentation.components.PartCard
 import com.partoria.client.presentation.viewmodels.FavoritesUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,18 +36,18 @@ fun FavoritesScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Favorites",
+                        stringResource(R.string.favorites),
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = AppColors.TextPrimary
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = AppColors.BackgroundStart
                 )
             )
         }
@@ -57,121 +58,130 @@ fun FavoritesScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF1A1A2E),
-                            Color(0xFF16213E)
+                            AppColors.BackgroundStart,
+                            AppColors.BackgroundEnd
                         )
                     )
                 )
                 .padding(paddingValues)
         ) {
             when (val state = favoritesState) {
-                is FavoritesUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFF6C63FF)
-                    )
-                }
                 is FavoritesUiState.Success -> {
                     if (state.favorites.isEmpty()) {
-                        Card(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .width(280.dp)
-                                .clip(RoundedCornerShape(24.dp)),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.White.copy(alpha = 0.1f)
-                            )
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Card(
+                                modifier = Modifier.width(AppDimens.CardWidthEmptyState),
+                                shape = RoundedCornerShape(AppDimens.CornerRadiusXLarge),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = AppColors.CardBackground
+                                )
                             ) {
-                                Icon(
-                                    Icons.Outlined.FavoriteBorder,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = Color.White.copy(alpha = 0.5f)
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "No favorites yet",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Parts you favorite will appear here",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.7f)
-                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(AppDimens.PaddingXXLarge),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.FavoriteBorder,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(AppDimens.IconSizeXLarge),
+                                        tint = AppColors.TextHint
+                                    )
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
+                                    Text(
+                                        text = stringResource(R.string.no_favorites_yet),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = AppColors.TextPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
+                                    Text(
+                                        text = stringResource(R.string.favorites_hint),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = AppColors.TextSecondary
+                                    )
+                                }
                             }
                         }
                     } else {
                         LazyColumn(
                             contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 12.dp,
-                                bottom = 90.dp
+                                start = AppDimens.PaddingLarge,
+                                end = AppDimens.PaddingLarge,
+                                top = AppDimens.PaddingSmall,
+                                bottom = AppDimens.BottomNavPaddingLarge
                             ),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium),
+                            modifier = Modifier.fillMaxSize()
                         ) {
                             items(state.favorites) { part ->
                                 PartCard(
                                     part = part,
                                     onClick = { onPartClick(part.id) },
                                     isFavorite = true,
-                                    onFavoriteClick = { isFavorite ->
-                                        if (isFavorite) {
-                                            partsViewModel.removeFromFavorites(part.id)
-                                        } else {
-                                            partsViewModel.addToFavorites(part.id)
-                                        }
+                                    onFavoriteClick = {
+                                        partsViewModel.removeFromFavorites(part.id)
                                     }
                                 )
                             }
                         }
                     }
                 }
-                is FavoritesUiState.Error -> {
-                    Card(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .width(280.dp)
-                            .clip(RoundedCornerShape(24.dp)),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.White.copy(alpha = 0.1f)
-                        )
+                is FavoritesUiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Column(
+                        CircularProgressIndicator(
+                            color = AppColors.Primary
+                        )
+                    }
+                }
+                is FavoritesUiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(AppDimens.PaddingXXLarge),
+                            shape = RoundedCornerShape(AppDimens.CornerRadiusXLarge),
+                            colors = CardDefaults.cardColors(
+                                containerColor = AppColors.CardBackground
+                            )
                         ) {
-                            Icon(
-                                Icons.Default.Favorite,
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = Color(0xFFFF6B6B)
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = state.message,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = { partsViewModel.loadFavorites() },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF6C63FF)
-                                ),
-                                shape = RoundedCornerShape(12.dp)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(AppDimens.PaddingXXLarge),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text("Try Again", color = Color.White)
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(AppDimens.IconSizeXLarge),
+                                    tint = AppColors.Error
+                                )
+                                Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
+                                Text(
+                                    text = state.message,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = AppColors.TextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
+                                Button(
+                                    onClick = { partsViewModel.loadFavorites() },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = AppColors.ButtonBackground
+                                    ),
+                                    shape = RoundedCornerShape(AppDimens.CornerRadiusSmall)
+                                ) {
+                                    Text(stringResource(R.string.retry), color = AppColors.TextPrimary)
+                                }
                             }
                         }
                     }

@@ -15,13 +15,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.partoria.client.R
 import com.partoria.client.domain.model.Filter
 import com.partoria.client.presentation.viewmodels.FiltersMetaUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,23 +78,23 @@ fun FilterScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Filters",
+                        stringResource(R.string.filters),
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = AppColors.TextPrimary
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = AppColors.TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = AppColors.BackgroundStart
                 ),
                 actions = {
                     TextButton(onClick = {
@@ -105,7 +108,7 @@ fun FilterScreen(
                             yearRange = meta.yearRange.min.toFloat()..meta.yearRange.max.toFloat()
                         }
                     }) {
-                        Text("Reset all", color = Color(0xFFFF6B6B))
+                        Text(stringResource(R.string.reset_all), color = AppColors.TextError)
                     }
                 }
             )
@@ -116,7 +119,7 @@ fun FilterScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding(),
-                    color = Color(0xFF1A1A2E),
+                    color = AppColors.BackgroundStart,
                     tonalElevation = 0.dp
                 ) {
                     Button(
@@ -137,16 +140,16 @@ fun FilterScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
-                            .height(52.dp),
+                            .padding(AppDimens.PaddingLarge)
+                            .height(AppDimens.ButtonHeight),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF6C63FF)
+                            containerColor = AppColors.ButtonBackground
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(AppDimens.CornerRadiusSmall)
                     ) {
-                        Icon(Icons.Default.FilterAlt, contentDescription = null, tint = Color.White)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Apply Filters", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        Icon(Icons.Default.FilterAlt, contentDescription = null, tint = AppColors.TextPrimary)
+                        Spacer(modifier = Modifier.width(AppDimens.PaddingSmall))
+                        Text(stringResource(R.string.apply_filters), style = MaterialTheme.typography.titleMedium, color = AppColors.TextPrimary)
                     }
                 }
             }
@@ -157,7 +160,7 @@ fun FilterScreen(
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1A1A2E), Color(0xFF16213E))
+                        colors = listOf(AppColors.BackgroundStart, AppColors.BackgroundEnd)
                     )
                 )
         ) {
@@ -165,7 +168,7 @@ fun FilterScreen(
                 is FiltersMetaUiState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFF6C63FF)
+                        color = AppColors.Primary
                     )
                 }
                 is FiltersMetaUiState.Error -> {
@@ -173,13 +176,13 @@ fun FilterScreen(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = currentState.message, color = Color(0xFFFF6B6B))
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = currentState.message, color = AppColors.TextError)
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                         Button(
                             onClick = { partsViewModel.loadFiltersMeta() },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C63FF))
+                            colors = ButtonDefaults.buttonColors(containerColor = AppColors.ButtonBackground)
                         ) {
-                            Text("Retry", color = Color.White)
+                            Text(stringResource(R.string.retry), color = AppColors.TextPrimary)
                         }
                     }
                 }
@@ -187,12 +190,12 @@ fun FilterScreen(
                     val meta = currentState.meta
                     LazyColumn(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        contentPadding = PaddingValues(AppDimens.PaddingLarge),
+                        verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingLarge)
                     ) {
                         item {
                             FilterSection(
-                                title = "Categories",
+                                title = stringResource(R.string.categories),
                                 items = meta.categories,
                                 selectedItems = selectedCategories,
                                 onSelectionChange = { selectedCategories = it }
@@ -200,7 +203,7 @@ fun FilterScreen(
                         }
                         item {
                             FilterSection(
-                                title = "Brands",
+                                title = stringResource(R.string.brands),
                                 items = meta.brands,
                                 selectedItems = selectedBrands,
                                 onSelectionChange = { selectedBrands = it }
@@ -209,27 +212,27 @@ fun FilterScreen(
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(AppDimens.CornerRadiusCard),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color.White.copy(alpha = 0.1f)
+                                    containerColor = AppColors.CardBackground
                                 )
                             ) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(AppDimens.PaddingLarge)) {
                                     Text(
-                                        text = "Price Range: $${priceRange.start.toInt()} - $${priceRange.endInclusive.toInt()}",
+                                        text = "${stringResource(R.string.price_range)}: $${priceRange.start.toInt()} - $${priceRange.endInclusive.toInt()}",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = AppColors.TextPrimary
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                                     RangeSlider(
                                         value = priceRange,
                                         onValueChange = { priceRange = it },
                                         valueRange = meta.priceRange.min.toFloat()..meta.priceRange.max.toFloat(),
                                         steps = 20,
                                         colors = SliderDefaults.colors(
-                                            thumbColor = Color(0xFF6C63FF),
-                                            activeTrackColor = Color(0xFF6C63FF)
+                                            thumbColor = AppColors.Primary,
+                                            activeTrackColor = AppColors.Primary
                                         )
                                     )
                                 }
@@ -238,27 +241,27 @@ fun FilterScreen(
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(AppDimens.CornerRadiusCard),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color.White.copy(alpha = 0.1f)
+                                    containerColor = AppColors.CardBackground
                                 )
                             ) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(AppDimens.PaddingLarge)) {
                                     Text(
-                                        text = "Year Range: ${yearRange.start.toInt()} - ${yearRange.endInclusive.toInt()}",
+                                        text = "${stringResource(R.string.year_range)}: ${yearRange.start.toInt()} - ${yearRange.endInclusive.toInt()}",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = AppColors.TextPrimary
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                                     RangeSlider(
                                         value = yearRange,
                                         onValueChange = { yearRange = it },
                                         valueRange = meta.yearRange.min.toFloat()..meta.yearRange.max.toFloat(),
                                         steps = 20,
                                         colors = SliderDefaults.colors(
-                                            thumbColor = Color(0xFF6C63FF),
-                                            activeTrackColor = Color(0xFF6C63FF)
+                                            thumbColor = AppColors.Primary,
+                                            activeTrackColor = AppColors.Primary
                                         )
                                     )
                                 }
@@ -267,54 +270,61 @@ fun FilterScreen(
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(AppDimens.CornerRadiusCard),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color.White.copy(alpha = 0.1f)
+                                    containerColor = AppColors.CardBackground
                                 )
                             ) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(AppDimens.PaddingLarge)) {
                                     Text(
-                                        text = "Sort By",
+                                        text = stringResource(R.string.sort_by),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = AppColors.TextPrimary
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall)) {
                                         sortOptions.forEach { option ->
+                                            val stringResId = when (option) {
+                                                "price" -> R.string.price
+                                                "name" -> R.string.name
+                                                "year" -> R.string.year
+                                                "brand" -> R.string.brand_label
+                                                else -> R.string.clear
+                                            }
                                             FilterChip(
                                                 selected = sortBy == option,
                                                 onClick = { sortBy = if (sortBy == option) null else option },
                                                 label = { Text(
-                                                    option.replaceFirstChar { it.uppercase() },
-                                                    color = if (sortBy == option) Color.White else Color.White.copy(alpha = 0.8f)
+                                                    stringResource(stringResId).replaceFirstChar { it.uppercase() },
+                                                    color = if (sortBy == option) AppColors.TextPrimary else AppColors.TextSecondary
                                                 )},
                                                 colors = FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = Color(0xFF6C63FF),
-                                                    selectedLabelColor = Color.White
+                                                    selectedContainerColor = AppColors.Primary,
+                                                    selectedLabelColor = AppColors.TextPrimary
                                                 )
                                             )
                                         }
                                     }
                                     if (sortBy != null) {
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
+                                        Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall)) {
                                             FilterChip(
                                                 selected = sortDirection == "asc",
                                                 onClick = { sortDirection = "asc" },
-                                                label = { Text("Ascending", color = Color.White) },
+                                                label = { Text(stringResource(R.string.ascending), color = AppColors.TextPrimary) },
                                                 colors = FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = Color(0xFF6C63FF),
-                                                    selectedLabelColor = Color.White
+                                                    selectedContainerColor = AppColors.Primary,
+                                                    selectedLabelColor = AppColors.TextPrimary
                                                 )
                                             )
                                             FilterChip(
                                                 selected = sortDirection == "desc",
                                                 onClick = { sortDirection = "desc" },
-                                                label = { Text("Descending", color = Color.White) },
+                                                label = { Text(stringResource(R.string.descending), color = AppColors.TextPrimary) },
                                                 colors = FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = Color(0xFF6C63FF),
-                                                    selectedLabelColor = Color.White
+                                                    selectedContainerColor = AppColors.Primary,
+                                                    selectedLabelColor = AppColors.TextPrimary
                                                 )
                                             )
                                         }
@@ -338,12 +348,12 @@ fun FilterSection(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(AppDimens.CornerRadiusCard),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.1f)
+            containerColor = AppColors.CardBackground
         )
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(AppDimens.PaddingLarge)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -353,19 +363,19 @@ fun FilterSection(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = AppColors.TextPrimary
                 )
                 if (selectedItems.isNotEmpty()) {
                     TextButton(
                         onClick = { onSelectionChange(emptyList()) },
-                        modifier = Modifier.height(32.dp)
+                        modifier = Modifier.height(AppDimens.PaddingXXLarge)
                     ) {
-                        Text("Clear", color = Color(0xFFFF6B6B))
+                        Text(stringResource(R.string.clear), color = AppColors.TextError)
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall)) {
                 items(items) { item ->
                     val isSelected = selectedItems.contains(item)
                     FilterChip(
@@ -376,15 +386,15 @@ fun FilterSection(
                                 else selectedItems + item
                             )
                         },
-                        label = { Text(item, color = if (isSelected) Color.White else Color.White.copy(alpha = 0.8f)) },
+                        label = { Text(item, color = if (isSelected) AppColors.TextPrimary else AppColors.TextSecondary) },
                         leadingIcon = if (isSelected) {
-                            { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White) }
+                            { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(AppDimens.IconSizeSmall), tint = AppColors.TextPrimary) }
                         } else null,
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF6C63FF),
-                            selectedLabelColor = Color.White,
-                            disabledContainerColor = Color.White.copy(alpha = 0.1f),
-                            disabledLabelColor = Color.White.copy(alpha = 0.7f)
+                            selectedContainerColor = AppColors.Primary,
+                            selectedLabelColor = AppColors.TextPrimary,
+                            disabledContainerColor = AppColors.BorderUnfocused,
+                            disabledLabelColor = AppColors.TextSecondary
                         )
                     )
                 }

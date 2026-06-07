@@ -3,28 +3,28 @@ package com.partoria.client.presentation.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.partoria.client.R
 import com.partoria.client.data.model.PartDetailRequest
 import com.partoria.client.presentation.viewmodels.FiltersMetaUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,28 +70,28 @@ fun AdminPartFormScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = AppColors.BackgroundEnd,
         topBar = {
             TopAppBar(
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall)
                     ) {
                         Text(
-                            if (isEditMode) "Edit Part" else "Create Part",
+                            if (isEditMode) stringResource(R.string.edit_part) else stringResource(R.string.create_part),
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = AppColors.TextPrimary
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = AppColors.TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = AppColors.BackgroundStart
                 )
             )
         }
@@ -101,7 +101,7 @@ fun AdminPartFormScreen(
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1A1A2E), Color(0xFF16213E))
+                        colors = listOf(AppColors.BackgroundStart, AppColors.BackgroundEnd)
                     )
                 )
         ) {
@@ -110,7 +110,7 @@ fun AdminPartFormScreen(
                     modifier = Modifier.fillMaxSize().padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF6C63FF))
+                    CircularProgressIndicator(color = AppColors.Primary)
                 }
             } else {
                 Column(
@@ -122,24 +122,24 @@ fun AdminPartFormScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        contentPadding = PaddingValues(AppDimens.PaddingLarge),
+                        verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium)
                     ) {
                         item {
                             OutlinedTextField(
                                 value = formState.name,
                                 onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(name = text) } },
-                                label = { Text("Name", color = Color.White.copy(alpha = 0.7f)) },
+                                label = { Text(stringResource(R.string.name_label), color = AppColors.TextSecondary) },
                                 modifier = Modifier.fillMaxWidth(),
                                 isError = showErrors && !isNameValid,
                                 supportingText = {
-                                    if (showErrors && !isNameValid) Text("Name is required", color = Color(0xFFFF6B6B))
+                                    if (showErrors && !isNameValid) Text(stringResource(R.string.name_required), color = AppColors.Error)
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF6C63FF),
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    focusedBorderColor = AppColors.BorderFocused,
+                                    unfocusedBorderColor = AppColors.BorderUnfocused,
+                                    focusedTextColor = AppColors.TextPrimary,
+                                    unfocusedTextColor = AppColors.TextPrimary
                                 )
                             )
                         }
@@ -152,30 +152,30 @@ fun AdminPartFormScreen(
                                     value = formState.category,
                                     onValueChange = {},
                                     readOnly = true,
-                                    label = { Text("Category", color = Color.White.copy(alpha = 0.7f)) },
+                                    label = { Text(stringResource(R.string.category_label), color = AppColors.TextSecondary) },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .menuAnchor(),
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                                     isError = showErrors && !isCategoryValid,
                                     supportingText = {
-                                        if (showErrors && !isCategoryValid) Text("Category is required", color = Color(0xFFFF6B6B))
+                                        if (showErrors && !isCategoryValid) Text(stringResource(R.string.category_required), color = AppColors.Error)
                                     },
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color(0xFF6C63FF),
-                                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
+                                        focusedBorderColor = AppColors.BorderFocused,
+                                        unfocusedBorderColor = AppColors.BorderUnfocused,
+                                        focusedTextColor = AppColors.TextPrimary,
+                                        unfocusedTextColor = AppColors.TextPrimary
                                     )
                                 )
                                 ExposedDropdownMenu(
                                     expanded = categoryExpanded,
                                     onDismissRequest = { categoryExpanded = false },
-                                    containerColor = Color(0xFF1A1A2E)
+                                    containerColor = AppColors.BackgroundStart
                                 ) {
                                     categories.forEach { category ->
                                         DropdownMenuItem(
-                                            text = { Text(category, color = Color.White) },
+                                            text = { Text(category, color = AppColors.TextPrimary) },
                                             onClick = {
                                                 partsViewModel.updatePartFormField { state -> state.copy(category = category) }
                                                 categoryExpanded = false
@@ -194,30 +194,30 @@ fun AdminPartFormScreen(
                                     value = formState.brand,
                                     onValueChange = {},
                                     readOnly = true,
-                                    label = { Text("Brand", color = Color.White.copy(alpha = 0.7f)) },
+                                    label = { Text(stringResource(R.string.brand_label), color = AppColors.TextSecondary) },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .menuAnchor(),
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) },
                                     isError = showErrors && !isBrandValid,
                                     supportingText = {
-                                        if (showErrors && !isBrandValid) Text("Brand is required", color = Color(0xFFFF6B6B))
+                                        if (showErrors && !isBrandValid) Text(stringResource(R.string.brand_required), color = AppColors.Error)
                                     },
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color(0xFF6C63FF),
-                                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
+                                        focusedBorderColor = AppColors.BorderFocused,
+                                        unfocusedBorderColor = AppColors.BorderUnfocused,
+                                        focusedTextColor = AppColors.TextPrimary,
+                                        unfocusedTextColor = AppColors.TextPrimary
                                     )
                                 )
                                 ExposedDropdownMenu(
                                     expanded = brandExpanded,
                                     onDismissRequest = { brandExpanded = false },
-                                    containerColor = Color(0xFF1A1A2E)
+                                    containerColor = AppColors.BackgroundStart
                                 ) {
                                     brands.forEach { brand ->
                                         DropdownMenuItem(
-                                            text = { Text(brand, color = Color.White) },
+                                            text = { Text(brand, color = AppColors.TextPrimary) },
                                             onClick = {
                                                 partsViewModel.updatePartFormField { state -> state.copy(brand = brand) }
                                                 brandExpanded = false
@@ -231,19 +231,19 @@ fun AdminPartFormScreen(
                             OutlinedTextField(
                                 value = formState.price,
                                 onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(price = text) } },
-                                label = { Text("Price", color = Color.White.copy(alpha = 0.7f)) },
+                                label = { Text(stringResource(R.string.price_label), color = AppColors.TextSecondary) },
                                 modifier = Modifier.fillMaxWidth(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                 isError = showErrors && !isPriceValid,
                                 supportingText = {
-                                    if (showErrors && !isPriceValid) Text("Price must be greater than 0", color = Color(0xFFFF6B6B))
+                                    if (showErrors && !isPriceValid) Text(stringResource(R.string.price_error), color = AppColors.Error)
                                 },
-                                leadingIcon = { Text("$", color = Color.White.copy(alpha = 0.7f)) },
+                                leadingIcon = { Text("$", color = AppColors.TextSecondary) },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF6C63FF),
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    focusedBorderColor = AppColors.BorderFocused,
+                                    unfocusedBorderColor = AppColors.BorderUnfocused,
+                                    focusedTextColor = AppColors.TextPrimary,
+                                    unfocusedTextColor = AppColors.TextPrimary
                                 )
                             )
                         }
@@ -251,18 +251,18 @@ fun AdminPartFormScreen(
                             OutlinedTextField(
                                 value = formState.specs,
                                 onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(specs = text) } },
-                                label = { Text("Specifications", color = Color.White.copy(alpha = 0.7f)) },
+                                label = { Text(stringResource(R.string.specs_label), color = AppColors.TextSecondary) },
                                 modifier = Modifier.fillMaxWidth(),
                                 minLines = 3,
                                 isError = showErrors && !isSpecsValid,
                                 supportingText = {
-                                    if (showErrors && !isSpecsValid) Text("Specifications are required", color = Color(0xFFFF6B6B))
+                                    if (showErrors && !isSpecsValid) Text(stringResource(R.string.specs_required), color = AppColors.Error)
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF6C63FF),
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    focusedBorderColor = AppColors.BorderFocused,
+                                    unfocusedBorderColor = AppColors.BorderUnfocused,
+                                    focusedTextColor = AppColors.TextPrimary,
+                                    unfocusedTextColor = AppColors.TextPrimary
                                 )
                             )
                         }
@@ -270,18 +270,18 @@ fun AdminPartFormScreen(
                             OutlinedTextField(
                                 value = formState.releaseYear,
                                 onValueChange = { text -> partsViewModel.updatePartFormField { state -> state.copy(releaseYear = text) } },
-                                label = { Text("Release Year", color = Color.White.copy(alpha = 0.7f)) },
+                                label = { Text(stringResource(R.string.release_year_label), color = AppColors.TextSecondary) },
                                 modifier = Modifier.fillMaxWidth(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 isError = showErrors && !isYearValid,
                                 supportingText = {
-                                    if (showErrors && !isYearValid) Text("Year must be between 2000 and 2026", color = Color(0xFFFF6B6B))
+                                    if (showErrors && !isYearValid) Text(stringResource(R.string.year_error), color = AppColors.Error)
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFF6C63FF),
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    focusedBorderColor = AppColors.BorderFocused,
+                                    unfocusedBorderColor = AppColors.BorderUnfocused,
+                                    focusedTextColor = AppColors.TextPrimary,
+                                    unfocusedTextColor = AppColors.TextPrimary
                                 )
                             )
                         }
@@ -289,33 +289,33 @@ fun AdminPartFormScreen(
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(AppDimens.CornerRadiusCard),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color.White.copy(alpha = 0.1f)
+                                    containerColor = AppColors.CardBackground
                                 )
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    modifier = Modifier.padding(AppDimens.PaddingLarge),
+                                    verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium)
                                 ) {
                                     Text(
-                                        text = "Technical Details",
+                                        text = stringResource(R.string.technical_details_title),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = AppColors.TextPrimary
                                     )
 
                                     if (formState.details.isNotEmpty()) {
                                         formState.details.forEach { (spec, value) ->
                                             Surface(
                                                 modifier = Modifier.fillMaxWidth(),
-                                                shape = RoundedCornerShape(12.dp),
-                                                color = Color.White.copy(alpha = 0.05f)
+                                                shape = RoundedCornerShape(AppDimens.CornerRadiusButton),
+                                                color = AppColors.SurfaceDark
                                             ) {
                                                 Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .padding(12.dp),
+                                                        .padding(AppDimens.PaddingMedium),
                                                     horizontalArrangement = Arrangement.SpaceBetween,
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
@@ -324,12 +324,12 @@ fun AdminPartFormScreen(
                                                             spec,
                                                             style = MaterialTheme.typography.bodyMedium,
                                                             fontWeight = FontWeight.Medium,
-                                                            color = Color.White
+                                                            color = AppColors.TextPrimary
                                                         )
                                                         Text(
                                                             value,
                                                             style = MaterialTheme.typography.bodySmall,
-                                                            color = Color.White.copy(alpha = 0.7f)
+                                                            color = AppColors.TextSecondary
                                                         )
                                                     }
                                                     IconButton(
@@ -338,13 +338,13 @@ fun AdminPartFormScreen(
                                                                 state.copy(details = state.details.filterNot { it.first == spec && it.second == value })
                                                             }
                                                         },
-                                                        modifier = Modifier.size(36.dp)
+                                                        modifier = Modifier.size(AppDimens.IconButtonSize)
                                                     ) {
                                                         Icon(
                                                             Icons.Default.Delete,
-                                                            contentDescription = "Delete",
-                                                            tint = Color(0xFFFF6B6B),
-                                                            modifier = Modifier.size(20.dp)
+                                                            contentDescription = stringResource(R.string.delete),
+                                                            tint = AppColors.Error,
+                                                            modifier = Modifier.size(AppDimens.IconSizeMedium)
                                                         )
                                                     }
                                                 }
@@ -352,46 +352,46 @@ fun AdminPartFormScreen(
                                         }
                                     } else {
                                         Text(
-                                            "No technical details added",
+                                            stringResource(R.string.no_details_added),
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = Color.White.copy(alpha = 0.5f)
+                                            color = AppColors.TextHint
                                         )
                                     }
 
                                     HorizontalDivider(
-                                        modifier = Modifier.padding(vertical = 4.dp),
-                                        color = Color.White.copy(alpha = 0.1f)
+                                        modifier = Modifier.padding(vertical = AppDimens.PaddingMicro),
+                                        color = AppColors.BorderUnfocused
                                     )
 
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall),
                                         verticalAlignment = Alignment.Top
                                     ) {
                                         OutlinedTextField(
                                             value = currentSpec,
                                             onValueChange = { currentSpec = it },
-                                            label = { Text("Specification", color = Color.White.copy(alpha = 0.7f)) },
+                                            label = { Text(stringResource(R.string.specification_hint), color = AppColors.TextSecondary) },
                                             modifier = Modifier.weight(1f),
                                             singleLine = true,
                                             colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = Color(0xFF6C63FF),
-                                                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                                focusedTextColor = Color.White,
-                                                unfocusedTextColor = Color.White
+                                                focusedBorderColor = AppColors.BorderFocused,
+                                                unfocusedBorderColor = AppColors.BorderUnfocused,
+                                                focusedTextColor = AppColors.TextPrimary,
+                                                unfocusedTextColor = AppColors.TextPrimary
                                             )
                                         )
                                         OutlinedTextField(
                                             value = currentValue,
                                             onValueChange = { currentValue = it },
-                                            label = { Text("Value", color = Color.White.copy(alpha = 0.7f)) },
+                                            label = { Text(stringResource(R.string.value_hint), color = AppColors.TextSecondary) },
                                             modifier = Modifier.weight(1f),
                                             singleLine = true,
                                             colors = OutlinedTextFieldDefaults.colors(
-                                                focusedBorderColor = Color(0xFF6C63FF),
-                                                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                                focusedTextColor = Color.White,
-                                                unfocusedTextColor = Color.White
+                                                focusedBorderColor = AppColors.BorderFocused,
+                                                unfocusedBorderColor = AppColors.BorderUnfocused,
+                                                focusedTextColor = AppColors.TextPrimary,
+                                                unfocusedTextColor = AppColors.TextPrimary
                                             )
                                         )
                                         IconButton(
@@ -405,12 +405,12 @@ fun AdminPartFormScreen(
                                                 }
                                             },
                                             modifier = Modifier
-                                                .padding(top = 8.dp)
-                                                .size(56.dp)
-                                                .clip(RoundedCornerShape(12.dp))
-                                                .background(Color(0xFF6C63FF))
+                                                .padding(top = AppDimens.PaddingSmall)
+                                                .size(AppDimens.AddButtonSize)
+                                                .clip(RoundedCornerShape(AppDimens.CornerRadiusButton))
+                                                .background(AppColors.Primary)
                                         ) {
-                                            Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+                                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add), tint = AppColors.TextPrimary)
                                         }
                                     }
                                 }
@@ -422,20 +422,21 @@ fun AdminPartFormScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(horizontal = AppDimens.PaddingLarge, vertical = AppDimens.PaddingSmall),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFFFF6B6B).copy(alpha = 0.1f)
+                                containerColor = AppColors.Error.copy(alpha = 0.1f)
                             )
                         ) {
                             Text(
                                 text = errorMessage!!,
-                                color = Color(0xFFFF6B6B),
-                                modifier = Modifier.padding(12.dp),
+                                color = AppColors.Error,
+                                modifier = Modifier.padding(AppDimens.PaddingMedium),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
-
+                    val errorUpdatePart = stringResource(R.string.error_update_part)
+                    val errorCreatePart = stringResource(R.string.error_create_part)
                     Button(
                         onClick = {
                             if (isEditMode && partId != null) {
@@ -457,7 +458,7 @@ fun AdminPartFormScreen(
                                     },
                                     onError = {
                                         isLoading = false
-                                        errorMessage = "Failed to update part."
+                                        errorMessage = errorUpdatePart
                                     }
                                 )
                             } else {
@@ -472,7 +473,7 @@ fun AdminPartFormScreen(
                                         specs = formState.specs,
                                         releaseYear = formState.releaseYear.toIntOrNull() ?: 2024,
                                         details = formState.details.map { (spec, value) ->
-                                            com.partoria.client.data.model.PartDetailRequest(
+                                            PartDetailRequest(
                                                 specification = spec,
                                                 value = value
                                             )
@@ -485,7 +486,7 @@ fun AdminPartFormScreen(
                                         },
                                         onError = {
                                             isLoading = false
-                                            errorMessage = "Failed to create part. Check your data."
+                                            errorMessage = errorCreatePart
                                         }
                                     )
                                 }
@@ -493,24 +494,24 @@ fun AdminPartFormScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
-                            .height(52.dp),
+                            .padding(AppDimens.PaddingLarge)
+                            .height(AppDimens.ButtonHeight),
                         enabled = !isLoading,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF6C63FF)
+                            containerColor = AppColors.ButtonBackground
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(AppDimens.CornerRadiusButton)
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White
+                                modifier = Modifier.size(AppDimens.IconSizeNormal),
+                                color = AppColors.TextPrimary
                             )
                         } else {
                             Text(
-                                if (isEditMode) "Update Part" else "Create Part",
+                                if (isEditMode) stringResource(R.string.update_part) else stringResource(R.string.create_part),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
+                                color = AppColors.TextPrimary
                             )
                         }
                     }

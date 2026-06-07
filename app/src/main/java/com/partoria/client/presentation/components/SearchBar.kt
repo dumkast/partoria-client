@@ -1,7 +1,6 @@
 package com.partoria.client.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -10,21 +9,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.partoria.client.R
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 @Composable
 fun SearchBar(
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String = "Search by category, brand...",
+    placeholder: String = stringResource(R.string.search_hint),
     modifier: Modifier = Modifier,
     isDarkBackground: Boolean = true
 ) {
-    val textColor = if (isDarkBackground) Color.White else Color.Black
+    val textColor = if (isDarkBackground) AppColors.TextPrimary else Color.Black
     val placeholderColor = textColor.copy(alpha = 0.5f)
     val iconColor = textColor.copy(alpha = 0.7f)
     val borderColor = textColor.copy(alpha = 0.3f)
-    val focusedBorderColor = Color(0xFF6C63FF)
 
     OutlinedTextField(
         value = value,
@@ -47,7 +48,7 @@ fun SearchBar(
                 IconButton(onClick = { onValueChange("") }) {
                     Icon(
                         Icons.Default.Clear,
-                        contentDescription = "Clear",
+                        contentDescription = stringResource(R.string.clear_search),
                         tint = iconColor
                     )
                 }
@@ -55,13 +56,13 @@ fun SearchBar(
         },
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(AppDimens.CornerRadiusMedium),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = focusedBorderColor,
+            focusedBorderColor = AppColors.Primary,
             unfocusedBorderColor = borderColor,
             focusedTextColor = textColor,
             unfocusedTextColor = textColor,
-            cursorColor = focusedBorderColor,
+            cursorColor = AppColors.Primary,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent
         )

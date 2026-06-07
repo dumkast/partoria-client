@@ -14,16 +14,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.partoria.client.R
 import com.partoria.client.presentation.viewmodels.AuthUiState
 import com.partoria.client.presentation.viewmodels.AuthViewModel
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,10 +43,11 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val currentState = uiState
+    val registerSuccessMsg = stringResource(R.string.register_success)
 
     LaunchedEffect(registrationSuccess) {
         if (registrationSuccess) {
-            snackbarHostState.showSnackbar("Account created successfully! Please login.")
+            snackbarHostState.showSnackbar(registerSuccessMsg)
             authViewModel.setRegistrationSuccess(false)
         }
     }
@@ -57,7 +60,7 @@ fun LoginScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Box(
@@ -66,8 +69,8 @@ fun LoginScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF1A1A2E),
-                            Color(0xFF16213E)
+                            AppColors.BackgroundStart,
+                            AppColors.BackgroundEnd
                         )
                     )
                 )
@@ -76,71 +79,70 @@ fun LoginScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(AppDimens.PaddingXLarge + AppDimens.PaddingMicro),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp)),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(AppDimens.CornerRadiusXLarge),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.05f)
+                        containerColor = AppColors.SurfaceDark
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(32.dp),
+                            .padding(AppDimens.PaddingXXLarge),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Welcome Back",
+                            text = stringResource(R.string.welcome_back),
                             style = MaterialTheme.typography.headlineLarge,
-                            color = Color.White
+                            color = AppColors.TextPrimary
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                         Text(
-                            text = "Sign in to continue",
+                            text = stringResource(R.string.sign_in_to_continue),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.7f)
+                            color = AppColors.TextSecondary
                         )
 
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingXXLarge))
 
                         OutlinedTextField(
                             value = username,
                             onValueChange = { username = it },
-                            label = { Text("Username", color = Color.White.copy(alpha = 0.7f)) },
+                            label = { Text(stringResource(R.string.username), color = AppColors.TextSecondary) },
                             leadingIcon = {
-                                Icon(Icons.Default.Email, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
+                                Icon(Icons.Default.Email, contentDescription = null, tint = AppColors.TextSecondary)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF6C63FF),
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = AppColors.BorderFocused,
+                                unfocusedBorderColor = AppColors.BorderUnfocused,
+                                focusedTextColor = AppColors.TextPrimary,
+                                unfocusedTextColor = AppColors.TextPrimary
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
 
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text("Password", color = Color.White.copy(alpha = 0.7f)) },
+                            label = { Text(stringResource(R.string.password), color = AppColors.TextSecondary) },
                             leadingIcon = {
-                                Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
+                                Icon(Icons.Default.Lock, contentDescription = null, tint = AppColors.TextSecondary)
                             },
                             trailingIcon = {
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                     Icon(
                                         if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                         contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.7f)
+                                        tint = AppColors.TextSecondary
                                     )
                                 }
                             },
@@ -149,46 +151,46 @@ fun LoginScreen(
                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF6C63FF),
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = AppColors.BorderFocused,
+                                unfocusedBorderColor = AppColors.BorderUnfocused,
+                                focusedTextColor = AppColors.TextPrimary,
+                                unfocusedTextColor = AppColors.TextPrimary
                             )
                         )
 
                         if (currentState is AuthUiState.Error) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                             Text(
                                 text = currentState.message,
-                                color = Color(0xFFFF6B6B),
+                                color = AppColors.TextError,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingXLarge + AppDimens.PaddingMicro))
 
                         Button(
                             onClick = { authViewModel.login(username, password) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp),
+                                .height(AppDimens.ButtonHeight),
                             enabled = currentState !is AuthUiState.Loading,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6C63FF)
+                                containerColor = AppColors.ButtonBackground
                             ),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(AppDimens.CornerRadiusSmall)
                         ) {
                             if (currentState is AuthUiState.Loading) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = Color.White
+                                    modifier = Modifier.size(AppDimens.IconSizeNormal),
+                                    color = AppColors.TextPrimary
                                 )
                             } else {
-                                Text("Sign In", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                                Text(stringResource(R.string.sign_in), style = MaterialTheme.typography.titleMedium, color = AppColors.TextPrimary)
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -196,13 +198,13 @@ fun LoginScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Don't have an account? ",
-                                color = Color.White.copy(alpha = 0.7f),
+                                text = stringResource(R.string.no_account) + " ",
+                                color = AppColors.TextSecondary,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = "Sign Up",
-                                color = Color(0xFF6C63FF),
+                                text = stringResource(R.string.sign_up),
+                                color = AppColors.Primary,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.clickable { onNavigateToRegister() }
                             )

@@ -9,7 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -17,16 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.partoria.client.R
 import com.partoria.client.domain.model.ComputerPart
+import com.partoria.client.presentation.components.PartCard
+import com.partoria.client.presentation.components.SearchBar
+import com.partoria.client.presentation.viewmodels.FiltersMetaUiState
 import com.partoria.client.presentation.viewmodels.PartsUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
-import com.partoria.client.presentation.components.SearchBar
-import com.partoria.client.presentation.components.PartCard
-import com.partoria.client.presentation.viewmodels.FiltersMetaUiState
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,47 +67,47 @@ fun AdminScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = AppColors.BackgroundEnd,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 80.dp)
+                modifier = Modifier.padding(bottom = AppDimens.SnackbarBottomOffset)
             )
         },
         topBar = {
             TopAppBar(
-                modifier = Modifier.padding(end = 16.dp),
+                modifier = Modifier.padding(end = AppDimens.PaddingLarge),
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall)
                     ) {
                         Icon(
                             Icons.Default.AdminPanelSettings,
                             contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                            tint = AppColors.TextPrimary,
+                            modifier = Modifier.size(AppDimens.IconSizeNormal)
                         )
                         Text(
-                            "Admin Panel (${allParts.size})",
+                            "${stringResource(R.string.admin_panel)} (${allParts.size})",
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = AppColors.TextPrimary
                         )
                     }
                 },
                 actions = {
                     FloatingActionButton(
                         onClick = onNavigateToCreate,
-                        containerColor = Color(0xFF6C63FF),
+                        containerColor = AppColors.Primary,
                         modifier = Modifier
-                            .size(40.dp),
-                        shape = RoundedCornerShape(12.dp)
+                            .size(AppDimens.FabSize),
+                        shape = RoundedCornerShape(AppDimens.CornerRadiusButton)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add), tint = AppColors.TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = AppColors.BackgroundStart
                 )
             )
         }
@@ -115,7 +117,7 @@ fun AdminScreen(
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1A1A2E), Color(0xFF16213E))
+                        colors = listOf(AppColors.BackgroundStart, AppColors.BackgroundEnd)
                     )
                 )
         ) {
@@ -127,10 +129,10 @@ fun AdminScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(16.dp)),
+                        .padding(horizontal = AppDimens.PaddingLarge, vertical = AppDimens.PaddingSmall)
+                        .clip(RoundedCornerShape(AppDimens.CornerRadiusCard)),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
+                        containerColor = AppColors.CardBackground
                     )
                 ) {
                     SearchBar(
@@ -144,17 +146,17 @@ fun AdminScreen(
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall),
+                        contentPadding = PaddingValues(horizontal = AppDimens.PaddingLarge)
                     ) {
                         item {
                             FilterChip(
                                 selected = selectedCategory == null,
                                 onClick = { partsViewModel.selectAdminCategory(null) },
-                                label = { Text("All", color = Color.White) },
+                                label = { Text(stringResource(R.string.all), color = AppColors.TextPrimary) },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = Color(0xFF6C63FF),
-                                    selectedLabelColor = Color.White
+                                    selectedContainerColor = AppColors.Primary,
+                                    selectedLabelColor = AppColors.TextPrimary
                                 )
                             )
                         }
@@ -162,10 +164,10 @@ fun AdminScreen(
                             FilterChip(
                                 selected = selectedCategory == category,
                                 onClick = { partsViewModel.selectAdminCategory(category) },
-                                label = { Text(category, color = Color.White) },
+                                label = { Text(category, color = AppColors.TextPrimary) },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = Color(0xFF6C63FF),
-                                    selectedLabelColor = Color.White
+                                    selectedContainerColor = AppColors.Primary,
+                                    selectedLabelColor = AppColors.TextPrimary
                                 )
                             )
                         }
@@ -184,7 +186,7 @@ fun AdminScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    CircularProgressIndicator(color = Color(0xFF6C63FF))
+                                    CircularProgressIndicator(color = AppColors.Primary)
                                 }
                             }
                         }
@@ -193,56 +195,57 @@ fun AdminScreen(
                                 Card(
                                     modifier = Modifier
                                         .align(Alignment.Center)
-                                        .width(280.dp)
-                                        .clip(RoundedCornerShape(24.dp)),
+                                        .width(AppDimens.IconSizeXLarge * 4)
+                                        .clip(RoundedCornerShape(AppDimens.CornerRadiusXLarge)),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = Color.White.copy(alpha = 0.1f)
+                                        containerColor = AppColors.CardBackground
                                     )
                                 ) {
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(32.dp),
+                                            .padding(AppDimens.PaddingXXLarge),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Icon(
-                                            Icons.Default.ShoppingCart,
+                                            Icons.Default.Search,
                                             contentDescription = null,
-                                            modifier = Modifier.size(64.dp),
-                                            tint = Color.White.copy(alpha = 0.5f)
+                                            modifier = Modifier.size(AppDimens.IconSizeXLarge),
+                                            tint = AppColors.TextHint
                                         )
-                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                         Text(
                                             text = if (searchQuery.isNotEmpty() || selectedCategory != null)
-                                                "No matching parts"
+                                                stringResource(R.string.no_matching_parts)
                                             else
-                                                "No parts found",
+                                                stringResource(R.string.no_parts_found),
                                             style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White
+                                            color = AppColors.TextPrimary
                                         )
-                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                         Button(
                                             onClick = onNavigateToCreate,
                                             colors = ButtonDefaults.buttonColors(
-                                                containerColor = Color(0xFF6C63FF)
+                                                containerColor = AppColors.Primary,
+                                                contentColor = AppColors.TextPrimary
                                             ),
-                                            shape = RoundedCornerShape(12.dp)
+                                            shape = RoundedCornerShape(AppDimens.CornerRadiusButton)
                                         ) {
                                             Icon(Icons.Default.Add, contentDescription = null)
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Create Part")
+                                            Spacer(modifier = Modifier.width(AppDimens.PaddingSmall))
+                                            Text(stringResource(R.string.create_part))
                                         }
                                     }
                                 }
                             } else {
                                 LazyColumn(
                                     contentPadding = PaddingValues(
-                                        start = 16.dp,
-                                        end = 16.dp,
-                                        top = 12.dp,
-                                        bottom = 90.dp
+                                        start = AppDimens.PaddingLarge,
+                                        end = AppDimens.PaddingLarge,
+                                        top = AppDimens.PaddingMedium,
+                                        bottom = AppDimens.BottomNavPaddingLarge
                                     ),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium)
                                 ) {
                                     items(allParts) { part ->
                                         PartCard(
@@ -260,39 +263,39 @@ fun AdminScreen(
                             Card(
                                 modifier = Modifier
                                     .align(Alignment.Center)
-                                    .width(280.dp)
-                                    .clip(RoundedCornerShape(24.dp)),
+                                    .width(AppDimens.CardWidthEmptyState)
+                                    .clip(RoundedCornerShape(AppDimens.CornerRadiusXLarge)),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color.White.copy(alpha = 0.1f)
+                                    containerColor = AppColors.CardBackground
                                 )
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(32.dp),
+                                        .padding(AppDimens.PaddingXXLarge),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Icon(
                                         Icons.Default.AdminPanelSettings,
                                         contentDescription = null,
-                                        modifier = Modifier.size(64.dp),
-                                        tint = Color(0xFFFF6B6B)
+                                        modifier = Modifier.size(AppDimens.IconSizeXLarge),
+                                        tint = AppColors.Error
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                     Text(
                                         text = state.message,
                                         style = MaterialTheme.typography.titleMedium,
-                                        color = Color.White
+                                        color = AppColors.TextPrimary
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                     Button(
                                         onClick = { partsViewModel.loadAdminParts() },
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFF6C63FF)
+                                            containerColor = AppColors.Primary
                                         ),
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(AppDimens.CornerRadiusButton)
                                     ) {
-                                        Text("Try Again", color = Color.White)
+                                        Text(stringResource(R.string.retry), color = AppColors.TextPrimary)
                                     }
                                 }
                             }
@@ -306,18 +309,18 @@ fun AdminScreen(
     showDeleteDialog?.let { part ->
         AlertDialog(
             onDismissRequest = { showDeleteDialog = null },
-            containerColor = Color(0xFF1A1A2E),
+            containerColor = AppColors.BackgroundStart,
             title = {
                 Text(
-                    "Delete Part",
+                    stringResource(R.string.delete_part),
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = AppColors.TextPrimary
                 )
             },
             text = {
                 Text(
-                    "Are you sure you want to delete \"${part.name}\"?",
-                    color = Color.White.copy(alpha = 0.7f)
+                    stringResource(R.string.delete_part_confirm, part.name),
+                    color = AppColors.TextSecondary
                 )
             },
             confirmButton = {
@@ -328,12 +331,12 @@ fun AdminScreen(
                         }
                     }
                 ) {
-                    Text("Delete", color = Color(0xFFFF6B6B))
+                    Text(stringResource(R.string.delete), color = AppColors.Error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = null }) {
-                    Text("Cancel", color = Color.White.copy(alpha = 0.7f))
+                    Text(stringResource(R.string.cancel), color = AppColors.TextSecondary)
                 }
             }
         )

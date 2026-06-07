@@ -16,12 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.partoria.client.R
 import com.partoria.client.domain.model.ComputerPart
 import com.partoria.client.presentation.viewmodels.PartsViewModel
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 import com.partoria.client.utils.CategoryIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,19 +49,19 @@ fun PartDetailScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = AppColors.BackgroundEnd,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Part Details",
+                        stringResource(R.string.part_details),
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = AppColors.TextPrimary
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = AppColors.TextPrimary)
                     }
                 },
                 actions = {
@@ -72,14 +74,14 @@ fun PartDetailScreen(
                         ) {
                             Icon(
                                 if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Favorite",
-                                tint = if (isFavorite) Color(0xFFFF6B6B) else Color.White
+                                contentDescription = stringResource(R.string.favorites),
+                                tint = if (isFavorite) AppColors.Error else AppColors.TextPrimary
                             )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = AppColors.BackgroundStart
                 )
             )
         }
@@ -89,7 +91,7 @@ fun PartDetailScreen(
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1A1A2E), Color(0xFF16213E))
+                        colors = listOf(AppColors.BackgroundStart, AppColors.BackgroundEnd)
                     )
                 )
                 .padding(paddingValues)
@@ -97,61 +99,61 @@ fun PartDetailScreen(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFF6C63FF)
+                    color = AppColors.Primary
                 )
             } else if (part == null) {
                 Card(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .width(280.dp)
-                        .clip(RoundedCornerShape(24.dp)),
+                        .width(AppDimens.CardWidthPartNotFound)
+                        .clip(RoundedCornerShape(AppDimens.CornerRadiusXLarge)),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
+                        containerColor = AppColors.CardBackground
                     )
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(32.dp),
+                            .padding(AppDimens.PaddingXXLarge),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
                             Icons.Default.Info,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = Color.White.copy(alpha = 0.5f)
+                            modifier = Modifier.size(AppDimens.IconSizeXLarge),
+                            tint = AppColors.TextHint
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                         Text(
-                            text = "Part not found",
+                            text = stringResource(R.string.part_not_found),
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
+                            color = AppColors.TextPrimary
                         )
                     }
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    contentPadding = PaddingValues(AppDimens.PaddingLarge),
+                    verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium)
                 ) {
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
+                            shape = RoundedCornerShape(AppDimens.CornerRadiusLarge),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color.White.copy(alpha = 0.1f)
+                                containerColor = AppColors.CardBackground
                             )
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(20.dp),
+                                    .padding(AppDimens.PaddingXLarge),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(120.dp)
-                                        .clip(RoundedCornerShape(32.dp))
+                                        .size(AppDimens.AvatarSize)
+                                        .clip(RoundedCornerShape(AppDimens.CornerRadiusAvatar))
                                         .background(
                                             brush = Brush.linearGradient(
                                                 colors = listOf(
@@ -165,51 +167,51 @@ fun PartDetailScreen(
                                     Icon(
                                         imageVector = CategoryIcon.getIcon(part?.category ?: ""),
                                         contentDescription = null,
-                                        modifier = Modifier.size(80.dp),
+                                        modifier = Modifier.size(AppDimens.AvatarIconSize),
                                         tint = CategoryIcon.getColor(part?.category ?: "")
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(20.dp))
+                                Spacer(modifier = Modifier.height(AppDimens.PaddingXLarge))
                                 Text(
                                     text = part?.name ?: "",
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = AppColors.TextPrimary
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(AppDimens.PaddingMicro))
                                 Text(
                                     text = "${part?.brand} • ${part?.category}",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White.copy(alpha = 0.7f)
+                                    color = AppColors.TextSecondary
                                 )
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                 Surface(
-                                    modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-                                    color = Color(0xFF6C63FF).copy(alpha = 0.2f)
+                                    modifier = Modifier.clip(RoundedCornerShape(AppDimens.CornerRadiusButton)),
+                                    color = AppColors.Primary.copy(alpha = 0.2f)
                                 ) {
                                     Text(
                                         text = "$${String.format("%.2f", part?.price)}",
                                         style = MaterialTheme.typography.headlineMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF6C63FF),
-                                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                                        color = AppColors.Primary,
+                                        modifier = Modifier.padding(horizontal = AppDimens.PaddingXLarge, vertical = AppDimens.PaddingSmall)
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingMicro)
                                 ) {
                                     Icon(
                                         Icons.Default.Sell,
                                         contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = Color.White.copy(alpha = 0.5f)
+                                        modifier = Modifier.size(AppDimens.IconSizeSmall),
+                                        tint = AppColors.TextHint
                                     )
                                     Text(
-                                        text = "Released: ${part?.releaseYear}",
+                                        text = "${stringResource(R.string.released)} ${part?.releaseYear}",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White.copy(alpha = 0.5f)
+                                        color = AppColors.TextHint
                                     )
                                 }
                             }
@@ -219,27 +221,27 @@ fun PartDetailScreen(
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
+                            shape = RoundedCornerShape(AppDimens.CornerRadiusLarge),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color.White.copy(alpha = 0.1f)
+                                containerColor = AppColors.CardBackground
                             )
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(20.dp)
+                                    .padding(AppDimens.PaddingXLarge)
                             ) {
                                 Text(
-                                    text = "Specifications",
+                                    text = stringResource(R.string.specifications),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = AppColors.TextPrimary
                                 )
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(AppDimens.PaddingMedium))
                                 Text(
                                     text = part?.specs ?: "",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White.copy(alpha = 0.8f),
+                                    color = AppColors.TextSecondary,
                                     lineHeight = 22.sp
                                 )
                             }
@@ -250,23 +252,23 @@ fun PartDetailScreen(
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(20.dp),
+                                shape = RoundedCornerShape(AppDimens.CornerRadiusLarge),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color.White.copy(alpha = 0.1f)
+                                    containerColor = AppColors.CardBackground
                                 )
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(20.dp)
+                                        .padding(AppDimens.PaddingXLarge)
                                 ) {
                                     Text(
-                                        text = "Technical Details",
+                                        text = stringResource(R.string.technical_details),
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = AppColors.TextPrimary
                                     )
-                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Spacer(modifier = Modifier.height(AppDimens.PaddingMedium))
                                     part?.details?.forEachIndexed { index, detail ->
                                         Column {
                                             Row(
@@ -277,19 +279,19 @@ fun PartDetailScreen(
                                                     text = detail.specification,
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     fontWeight = FontWeight.Medium,
-                                                    color = Color.White.copy(alpha = 0.9f)
+                                                    color = AppColors.TextPrimary
                                                 )
                                                 Text(
                                                     text = detail.value,
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    color = Color(0xFF6C63FF)
+                                                    color = AppColors.Primary
                                                 )
                                             }
                                             if (index < (part?.details?.size ?: 0) - 1) {
-                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                                                 Divider(
-                                                    color = Color.White.copy(alpha = 0.1f),
-                                                    modifier = Modifier.padding(vertical = 4.dp)
+                                                    color = AppColors.BorderUnfocused,
+                                                    modifier = Modifier.padding(vertical = AppDimens.PaddingMicro)
                                                 )
                                             }
                                         }

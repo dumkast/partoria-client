@@ -14,9 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.partoria.client.R
 import com.partoria.client.domain.model.ComputerPart
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 import com.partoria.client.utils.CategoryIcon
 
 @Composable
@@ -33,24 +36,23 @@ fun PartCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.ElevationDefault),
+        shape = RoundedCornerShape(AppDimens.CornerRadiusCard),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.95f)
+            containerColor = AppColors.CardWhite
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(AppDimens.PaddingLarge),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Category Icon with gradient background
             Box(
                 modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .size(AppDimens.CardIconBoxSize)
+                    .clip(RoundedCornerShape(AppDimens.CornerRadiusCard))
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
@@ -64,111 +66,109 @@ fun PartCard(
                 Icon(
                     imageVector = CategoryIcon.getIcon(part.category),
                     contentDescription = part.category,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(AppDimens.IconSizeLarge),
                     tint = CategoryIcon.getColor(part.category)
                 )
             }
 
-            // Part info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = part.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A2E)
+                    color = AppColors.TextDarkPrimary
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(AppDimens.PaddingMicro))
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingMicro),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         Icons.Default.Business,
                         contentDescription = null,
-                        modifier = Modifier.size(12.dp),
-                        tint = Color.Gray
+                        modifier = Modifier.size(AppDimens.IconSizeSmall),
+                        tint = AppColors.TextDarkSecondary
                     )
                     Text(
                         text = part.brand,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = AppColors.TextDarkSecondary
                     )
                     Text(
                         text = "•",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = AppColors.TextDarkSecondary
                     )
                     Icon(
                         Icons.Default.Category,
                         contentDescription = null,
-                        modifier = Modifier.size(12.dp),
-                        tint = Color.Gray
+                        modifier = Modifier.size(AppDimens.IconSizeSmall),
+                        tint = AppColors.TextDarkSecondary
                     )
                     Text(
                         text = part.category,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = AppColors.TextDarkSecondary
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                 Text(
                     text = "$${String.format("%.2f", part.price)}",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6C63FF)
+                    color = AppColors.Primary
                 )
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingMicro),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         Icons.Default.CalendarToday,
                         contentDescription = null,
-                        modifier = Modifier.size(12.dp),
-                        tint = Color.Gray
+                        modifier = Modifier.size(AppDimens.IconSizeSmall),
+                        tint = AppColors.TextDarkSecondary
                     )
                     Text(
-                        text = "Released: ${part.releaseYear}",
+                        text = stringResource(R.string.released_short, part.releaseYear),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = AppColors.TextDarkSecondary
                     )
                 }
             }
 
-            // Actions
             when {
                 showEditDelete && onEdit != null && onDelete != null -> {
                     Column(
                         horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingSmall)
                     ) {
                         IconButton(
                             onClick = onEdit,
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF6C63FF).copy(alpha = 0.1f))
+                                .size(AppDimens.IconButtonSize)
+                                .clip(RoundedCornerShape(AppDimens.CornerRadiusSmall))
+                                .background(AppColors.EditButtonBackground)
                         ) {
                             Icon(
                                 Icons.Default.Edit,
-                                contentDescription = "Edit",
-                                tint = Color(0xFF6C63FF),
-                                modifier = Modifier.size(20.dp)
+                                contentDescription = stringResource(R.string.edit),
+                                tint = AppColors.Primary,
+                                modifier = Modifier.size(AppDimens.IconSizeMedium)
                             )
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(AppDimens.PaddingMicro))
                         IconButton(
                             onClick = onDelete,
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFFFF6B6B).copy(alpha = 0.1f))
+                                .size(AppDimens.IconButtonSize)
+                                .clip(RoundedCornerShape(AppDimens.CornerRadiusSmall))
+                                .background(AppColors.DeleteButtonBackground)
                         ) {
                             Icon(
                                 Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = Color(0xFFFF6B6B),
-                                modifier = Modifier.size(20.dp)
+                                contentDescription = stringResource(R.string.delete),
+                                tint = AppColors.Error,
+                                modifier = Modifier.size(AppDimens.IconSizeMedium)
                             )
                         }
                     }
@@ -177,18 +177,18 @@ fun PartCard(
                     IconButton(
                         onClick = { onFavoriteClick(isFavorite) },
                         modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .size(AppDimens.CardFavoriteButtonSize)
+                            .clip(RoundedCornerShape(AppDimens.CornerRadiusButton))
                             .background(
-                                if (isFavorite) Color(0xFFFF6B6B).copy(alpha = 0.1f)
+                                if (isFavorite) AppColors.DeleteButtonBackground
                                 else Color.Transparent
                             )
                     ) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                            tint = if (isFavorite) Color(0xFFFF6B6B) else Color.Gray,
-                            modifier = Modifier.size(26.dp)
+                            contentDescription = if (isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites),
+                            tint = if (isFavorite) AppColors.Error else AppColors.TextDarkSecondary,
+                            modifier = Modifier.size(AppDimens.IconSizeNormal)
                         )
                     }
                 }

@@ -14,10 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.partoria.client.R
 import com.partoria.client.presentation.viewmodels.AuthViewModel
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 data class GradientColors(val name: String, val start: Color, val end: Color)
 
@@ -35,7 +38,7 @@ fun ProfileScreen(
     val username by authViewModel.getUsername().collectAsStateWithLifecycle(initialValue = "")
     val role by authViewModel.getUserRole().collectAsStateWithLifecycle(initialValue = "")
 
-    val displayUsername = username?.takeIf { it.isNotBlank() } ?: "User"
+    val displayUsername = username?.takeIf { it.isNotBlank() } ?: stringResource(R.string.app_name)
 
     val vibrantGradients = remember {
         listOf(
@@ -66,18 +69,18 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = AppColors.BackgroundEnd,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Profile",
+                        stringResource(R.string.profile),
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = AppColors.TextPrimary
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = AppColors.BackgroundStart
                 )
             )
         }
@@ -87,7 +90,7 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFF1A1A2E), Color(0xFF16213E))
+                        colors = listOf(AppColors.BackgroundStart, AppColors.BackgroundEnd)
                     )
                 )
         ) {
@@ -95,13 +98,12 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                    .padding(horizontal = AppDimens.PaddingLarge, vertical = AppDimens.PaddingXLarge),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Avatar
                 Box(
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(AppDimens.AvatarSize)
                         .clip(CircleShape)
                         .background(
                             brush = Brush.linearGradient(
@@ -112,123 +114,115 @@ fun ProfileScreen(
                 ) {
                     Text(
                         text = avatarLetter,
-                        color = Color.White,
+                        color = AppColors.TextPrimary,
                         style = MaterialTheme.typography.displayMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // User info card
+                Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(AppDimens.CornerRadiusLarge),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
+                        containerColor = AppColors.CardBackground
                     )
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(20.dp)
+                            .padding(AppDimens.PaddingXLarge)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium)
                         ) {
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = null,
-                                tint = Color(0xFF6C63FF),
-                                modifier = Modifier.size(32.dp)
+                                tint = AppColors.Primary,
+                                modifier = Modifier.size(AppDimens.IconSizeLarge)
                             )
                             Column {
                                 Text(
                                     text = displayUsername,
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = AppColors.TextPrimary
                                 )
                                 Text(
-                                    text = "Username",
-                                    color = Color.White.copy(alpha = 0.5f)
+                                    text = stringResource(R.string.username).lowercase(),
+                                    color = AppColors.TextHint
                                 )
                             }
                         }
 
                         if (!role.isNullOrBlank()) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Divider(color = Color.White.copy(alpha = 0.1f))
-                            Spacer(modifier = Modifier.height(16.dp))
-
+                            Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
+                            Divider(color = AppColors.BorderUnfocused)
+                            Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium)
                             ) {
                                 Icon(
                                     Icons.Default.Settings,
                                     contentDescription = null,
-                                    tint = Color(0xFF6C63FF),
-                                    modifier = Modifier.size(32.dp)
+                                    tint = AppColors.Primary,
+                                    modifier = Modifier.size(AppDimens.IconSizeLarge)
                                 )
                                 Column {
                                     Text(
                                         text = role?.replaceFirstChar { it.uppercase() } ?: "",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Normal,
-                                        color = Color.White
+                                        color = AppColors.TextPrimary
                                     )
                                     Text(
-                                        text = "Access Level / Role",
-                                        color = Color.White.copy(alpha = 0.5f)
+                                        text = stringResource(R.string.access_level),
+                                        color = AppColors.TextHint
                                     )
                                 }
                             }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Settings card
+                Spacer(modifier = Modifier.height(AppDimens.PaddingXLarge))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(AppDimens.CornerRadiusLarge),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
+                        containerColor = AppColors.CardBackground
                     )
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Avatar Color
                         ListItem(
                             headlineContent = {
                                 Text(
-                                    "Avatar Color",
-                                    color = Color.White,
+                                    stringResource(R.string.avatar_color),
+                                    color = AppColors.TextPrimary,
                                     fontWeight = FontWeight.Medium
                                 )
                             },
                             supportingContent = {
                                 Text(
-                                    "Current: ${selectedGradient.name}",
-                                    color = Color.White.copy(alpha = 0.5f)
+                                    "${stringResource(R.string.current)} ${selectedGradient.name}",
+                                    color = AppColors.TextHint
                                 )
                             },
                             leadingContent = {
                                 Icon(
                                     Icons.Default.Palette,
                                     contentDescription = null,
-                                    tint = Color(0xFF6C63FF),
-                                    modifier = Modifier.size(32.dp)
+                                    tint = AppColors.Primary,
+                                    modifier = Modifier.size(AppDimens.IconSizeLarge)
                                 )
                             },
                             trailingContent = {
                                 Box(
                                     modifier = Modifier
-                                        .size(32.dp)
+                                        .size(AppDimens.IconSizeLarge)
                                         .clip(CircleShape)
                                         .background(
                                             brush = Brush.linearGradient(
@@ -240,16 +234,15 @@ fun ProfileScreen(
                             modifier = Modifier.clickable { showColorDropdown = true },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                         )
-
                         DropdownMenu(
                             expanded = showColorDropdown,
                             onDismissRequest = { showColorDropdown = false },
                             modifier = Modifier.fillMaxWidth(0.9f),
-                            containerColor = Color(0xFF1A1A2E)
+                            containerColor = AppColors.BackgroundStart
                         ) {
                             vibrantGradients.forEachIndexed { index, gradient ->
                                 DropdownMenuItem(
-                                    text = { Text(gradient.name, color = Color.White) },
+                                    text = { Text(gradient.name, color = AppColors.TextPrimary) },
                                     onClick = {
                                         onColorIndexChange(index)
                                         showColorDropdown = false
@@ -257,7 +250,7 @@ fun ProfileScreen(
                                     leadingIcon = {
                                         Box(
                                             modifier = Modifier
-                                                .size(24.dp)
+                                                .size(AppDimens.IconSizeNormal)
                                                 .clip(CircleShape)
                                                 .background(
                                                     brush = Brush.linearGradient(
@@ -271,7 +264,7 @@ fun ProfileScreen(
                                             Icon(
                                                 Icons.Default.Check,
                                                 contentDescription = null,
-                                                tint = Color(0xFF6C63FF)
+                                                tint = AppColors.Primary
                                             )
                                         }
                                     }
@@ -280,51 +273,47 @@ fun ProfileScreen(
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // Logout button
+                Spacer(modifier = Modifier.height(AppDimens.SpacingLarge))
                 Button(
                     onClick = { showLogoutDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
+                        .height(AppDimens.ButtonHeight),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF6B6B).copy(alpha = 0.15f)
+                        containerColor = AppColors.DeleteButtonBackground
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(AppDimens.CornerRadiusButton)
                 ) {
                     Icon(
                         Icons.Default.ExitToApp,
                         contentDescription = null,
-                        tint = Color(0xFFFF6B6B)
+                        tint = AppColors.Error
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(AppDimens.PaddingSmall))
                     Text(
-                        "Logout",
-                        color = Color(0xFFFF6B6B),
+                        stringResource(R.string.logout),
+                        color = AppColors.Error,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
         }
     }
-
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            containerColor = Color(0xFF1A1A2E),
+            containerColor = AppColors.BackgroundStart,
             title = {
                 Text(
-                    "Logout",
+                    stringResource(R.string.logout),
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = AppColors.TextPrimary
                 )
             },
             text = {
                 Text(
-                    "Are you sure you want to logout?",
-                    color = Color.White.copy(alpha = 0.7f)
+                    stringResource(R.string.logout_confirm),
+                    color = AppColors.TextSecondary
                 )
             },
             confirmButton = {
@@ -335,12 +324,12 @@ fun ProfileScreen(
                         onLogout()
                     }
                 ) {
-                    Text("Yes", color = Color(0xFFFF6B6B))
+                    Text(stringResource(R.string.yes), color = AppColors.Error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("No", color = Color.White.copy(alpha = 0.7f))
+                    Text(stringResource(R.string.no), color = AppColors.TextSecondary)
                 }
             }
         )

@@ -12,18 +12,19 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.partoria.client.domain.model.ComputerPart
+import com.partoria.client.R
 import com.partoria.client.presentation.viewmodels.FavoritesUiState
 import com.partoria.client.presentation.viewmodels.PartsUiState
 import com.partoria.client.presentation.viewmodels.PartsViewModel
 import com.partoria.client.presentation.components.SearchBar
 import com.partoria.client.presentation.components.PartCard
+import com.partoria.client.ui.theme.AppColors
+import com.partoria.client.ui.theme.AppDimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,34 +67,34 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Computer Parts",
+                        stringResource(R.string.computer_parts),
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = AppColors.TextPrimary
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = AppColors.BackgroundStart
                 ),
                 actions = {
                     if (isFilterActive) {
                         IconButton(onClick = { partsViewModel.resetFilters() }) {
                             Icon(
                                 Icons.Default.Clear,
-                                contentDescription = "Clear filters",
-                                tint = Color(0xFFFF6B6B)
+                                contentDescription = stringResource(R.string.clear_filters),
+                                tint = AppColors.Error
                             )
                         }
                     }
                     IconButton(onClick = onFilterClick) {
                         Icon(
                             Icons.Default.FilterList,
-                            contentDescription = "Filter",
-                            tint = if (isFilterActive) Color(0xFF6C63FF) else Color.White
+                            contentDescription = stringResource(R.string.filter),
+                            tint = if (isFilterActive) AppColors.Primary else AppColors.TextPrimary
                         )
                     }
                 }
@@ -106,8 +107,8 @@ fun HomeScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF1A1A2E),
-                            Color(0xFF16213E)
+                            AppColors.BackgroundStart,
+                            AppColors.BackgroundEnd
                         )
                     )
                 )
@@ -120,10 +121,10 @@ fun HomeScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
-                        .clip(RoundedCornerShape(16.dp)),
+                        .padding(AppDimens.PaddingLarge),
+                    shape = RoundedCornerShape(AppDimens.CornerRadiusCard),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
+                        containerColor = AppColors.CardBackground
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
@@ -149,45 +150,44 @@ fun HomeScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Card(
-                                        modifier = Modifier
-                                            .width(280.dp)
-                                            .clip(RoundedCornerShape(24.dp)),
+                                        modifier = Modifier.width(AppDimens.CardWidthEmptyState),
+                                        shape = RoundedCornerShape(AppDimens.CornerRadiusXLarge),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = Color.White.copy(alpha = 0.1f)
+                                            containerColor = AppColors.CardBackground
                                         )
                                     ) {
                                         Column(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(32.dp),
+                                                .padding(AppDimens.PaddingXXLarge),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Icon(
                                                 Icons.Default.Search,
                                                 contentDescription = null,
-                                                modifier = Modifier.size(64.dp),
-                                                tint = Color.White.copy(alpha = 0.5f)
+                                                modifier = Modifier.size(AppDimens.IconSizeXLarge),
+                                                tint = AppColors.TextHint
                                             )
-                                            Spacer(modifier = Modifier.height(16.dp))
+                                            Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                             Text(
                                                 text = if (searchQuery.isNotEmpty())
-                                                    "No results for \"$searchQuery\""
+                                                    stringResource(R.string.no_results, searchQuery)
                                                 else
-                                                    "No parts found",
+                                                    stringResource(R.string.no_parts_found),
                                                 style = MaterialTheme.typography.titleMedium,
-                                                color = Color.White
+                                                color = AppColors.TextPrimary
                                             )
-                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Spacer(modifier = Modifier.height(AppDimens.PaddingSmall))
                                             Text(
                                                 text = if (searchQuery.isNotEmpty())
-                                                    "Try a different search term"
+                                                    stringResource(R.string.try_different_search)
                                                 else
-                                                    "Check back later for new parts",
+                                                    stringResource(R.string.check_back_later),
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = Color.White.copy(alpha = 0.7f)
+                                                color = AppColors.TextSecondary
                                             )
                                             if (searchQuery.isNotEmpty() || isFilterActive) {
-                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                                 Button(
                                                     onClick = {
                                                         searchQuery = ""
@@ -195,11 +195,11 @@ fun HomeScreen(
                                                         partsViewModel.resetFilters()
                                                     },
                                                     colors = ButtonDefaults.buttonColors(
-                                                        containerColor = Color(0xFF6C63FF)
+                                                        containerColor = AppColors.ButtonBackground
                                                     ),
-                                                    shape = RoundedCornerShape(12.dp)
+                                                    shape = RoundedCornerShape(AppDimens.CornerRadiusSmall)
                                                 ) {
-                                                    Text("Clear all filters", color = Color.White)
+                                                    Text(stringResource(R.string.clear_all_filters), color = AppColors.TextPrimary)
                                                 }
                                             }
                                         }
@@ -208,12 +208,12 @@ fun HomeScreen(
                             } else {
                                 LazyColumn(
                                     contentPadding = PaddingValues(
-                                        start = 16.dp,
-                                        end = 16.dp,
-                                        top = 6.dp,
-                                        bottom = 90.dp
+                                        start = AppDimens.PaddingLarge,
+                                        end = AppDimens.PaddingLarge,
+                                        top = AppDimens.TopContentPadding,
+                                        bottom = AppDimens.BottomNavPaddingLarge
                                     ),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    verticalArrangement = Arrangement.spacedBy(AppDimens.PaddingMedium)
                                 ) {
                                     items(state.parts) { part ->
                                         PartCard(
@@ -239,7 +239,7 @@ fun HomeScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator(
-                                        color = Color(0xFF6C63FF)
+                                        color = AppColors.Primary
                                     )
                                 }
                             }
@@ -250,40 +250,39 @@ fun HomeScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Card(
-                                    modifier = Modifier
-                                        .width(280.dp)
-                                        .clip(RoundedCornerShape(24.dp)),
+                                    modifier = Modifier.width(AppDimens.CardWidthEmptyState),
+                                    shape = RoundedCornerShape(AppDimens.CornerRadiusXLarge),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = Color.White.copy(alpha = 0.1f)
+                                        containerColor = AppColors.CardBackground
                                     )
                                 ) {
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(32.dp),
+                                            .padding(AppDimens.PaddingXXLarge),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Icon(
                                             Icons.Default.Error,
                                             contentDescription = null,
-                                            modifier = Modifier.size(64.dp),
-                                            tint = Color(0xFFFF6B6B)
+                                            modifier = Modifier.size(AppDimens.IconSizeXLarge),
+                                            tint = AppColors.Error
                                         )
-                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                         Text(
                                             text = state.message,
                                             style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White
+                                            color = AppColors.TextPrimary
                                         )
-                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Spacer(modifier = Modifier.height(AppDimens.PaddingLarge))
                                         Button(
                                             onClick = { partsViewModel.loadParts() },
                                             colors = ButtonDefaults.buttonColors(
-                                                containerColor = Color(0xFF6C63FF)
+                                                containerColor = AppColors.ButtonBackground
                                             ),
-                                            shape = RoundedCornerShape(12.dp)
+                                            shape = RoundedCornerShape(AppDimens.CornerRadiusSmall)
                                         ) {
-                                            Text("Try Again", color = Color.White)
+                                            Text(stringResource(R.string.retry), color = AppColors.TextPrimary)
                                         }
                                     }
                                 }

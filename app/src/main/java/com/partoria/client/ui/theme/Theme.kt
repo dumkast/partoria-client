@@ -44,10 +44,24 @@ object AppColors {
     val BackgroundStart = Color(0xFF1A1A2E)
     val BackgroundEnd = Color(0xFF16213E)
     val SurfaceLight = Color.White.copy(alpha = 0.1f)
+    val SurfaceDark = Color.White.copy(alpha = 0.05f)
 
     val TextPrimary = Color.White
     val TextSecondary = Color.White.copy(alpha = 0.7f)
+    val TextDarkPrimary = Color(0xFF1A1A2E)
+    val TextDarkSecondary = Color.Gray
+    val TextDarkHint = Color.Gray.copy(alpha = 0.7f)
     val TextHint = Color.White.copy(alpha = 0.5f)
+    val TextError = Color(0xFFFF6B6B)
+
+    val BorderFocused = Color(0xFF6C63FF)
+    val BorderUnfocused = Color.White.copy(alpha = 0.3f)
+
+    val CardWhite = Color.White.copy(alpha = 0.95f)
+    val CardBackground = Color.White.copy(alpha = 0.1f)
+    val ButtonBackground = Color(0xFF6C63FF)
+    val DeleteButtonBackground = Color(0xFFFF6B6B).copy(alpha = 0.1f)
+    val EditButtonBackground = Color(0xFF6C63FF).copy(alpha = 0.1f)
 }
 
 object AppDimens {
@@ -57,16 +71,49 @@ object AppDimens {
     val PaddingXLarge = 20.dp
     val PaddingXXLarge = 32.dp
 
+    val PaddingMicro = 4.dp
+    val PaddingCard = 16.dp
+    val PaddingScreen = 16.dp
+    val PaddingButton = 16.dp
+
+    val BottomNavPaddingLarge = 90.dp
+    val TopContentPadding = 6.dp
+    val CardWidthEmptyState = 280.dp
+    val CardWidthErrorState = 280.dp
+    val SnackbarBottomOffset = 80.dp
+    val CardWidthPartNotFound = 192.dp
+
     val ButtonHeight = 52.dp
-    val IconSizeMedium = 24.dp
+    val IconSizeSmall = 16.dp
+    val IconSizeMedium = 20.dp
+    val IconSizeNormal = 24.dp
     val IconSizeLarge = 32.dp
     val IconSizeXLarge = 64.dp
+    val IconSizeXXLarge = 80.dp
+    val IconSizeAvatar = 120.dp
+
+    val AvatarSize = 120.dp
+    val AvatarIconSize = 80.dp
+    val FabSize = 40.dp
+    val IconButtonSize = 36.dp
+    val AddButtonSize = 56.dp
 
     val CornerRadiusSmall = 12.dp
     val CornerRadiusMedium = 16.dp
     val CornerRadiusLarge = 20.dp
     val CornerRadiusXLarge = 24.dp
+    val CornerRadiusCard = 16.dp
+    val CornerRadiusButton = 12.dp
+    val CornerRadiusAvatar = 32.dp
+
+    val ElevationDefault = 4.dp
+
+    val SpacingLarge = 64.dp
+
+    val CardIconBoxSize = 60.dp
+    val CardFavoriteButtonSize = 44.dp
 }
+
 
 @Composable
 fun PartoriaClientTheme(
